@@ -1,6 +1,7 @@
 {-# LANGUAGE UnicodeSyntax #-}
 module Loh.Player where
 
+import Control.Arrow (second)
 import Control.Applicative ((<$>))
 import Data.Maybe (fromJust, fromMaybe, isJust)
 
@@ -17,7 +18,7 @@ getMocpInfo = do
     Right (MOC.MocpInfo MOC.Playing (Just s)) → Just TrackInfo
       { artist = MOC.artist $ MOC.metadata s
       , album = MOC.album $ MOC.metadata s
-      , duration = (fromIntegral (MOC.currentSec s)) / (fromIntegral (MOC.totalSec s))
+      , duration = fromIntegral (MOC.currentSec s) / fromIntegral (MOC.totalSec s)
       , track = MOC.track $ MOC.metadata s
       }
     _ → Nothing
@@ -34,8 +35,8 @@ getMpdInfo = do
             Just TrackInfo
               { artist = fromMaybe "No Artist" $ head <$> M.lookup MPD.Artist tag
               , album = fromMaybe "No Album" $ head <$> M.lookup MPD.Album tag
-              , duration = curTime / (fromIntegral totalTime)
-              , track = fromMaybe "No Track" $ head <$> M.lookup MPD.Track tag
+              , duration = curTime / fromIntegral totalTime
+              , track = fromMaybe "No Track" $ head <$> M.lookup MPD.Title tag
               } where tag = MPD.sgTags song
           _ → Nothing
         _ → Nothing
@@ -50,4 +51,4 @@ getPlayersInfo = do
     [ (Mpd, maybeMpdInfo)
     , (Mocp, maybeMocpInfo)
     ]
-    where catMaybeSnd = map (\(f,s) -> (f, fromJust s)) . filter (isJust . snd)
+    where catMaybeSnd = map (second fromJust) . filter (isJust . snd)
