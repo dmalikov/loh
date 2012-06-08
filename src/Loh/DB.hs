@@ -1,3 +1,4 @@
+{-# LANGUAGE UnicodeSyntax #-}
 module Loh.DB
   ( clear
   , getDB

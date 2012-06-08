@@ -1,0 +1,41 @@
+Name:                   Loh
+Version:                0.0.0
+Category:               Network
+Description:            LastFMScrobbler on Haskell
+Synopsis:               LastFMScrobbler on Haskell
+
+License:                MIT
+License-file:           LICENSE
+
+Author:                 Dmitry Malikov
+
+Maintainer:             Dmitry Malikov <malikov.d.y@gmail.com>
+
+Build-type:             Simple
+Cabal-version:          >= 1.6
+Homepage:               -
+
+Library
+  Build-Depends:        base >= 3 && < 5,
+                        containers,
+                        directory,
+                        filepath,
+                        libmpd == 0.7.2,
+                        liblastfm,
+                        mtl,
+                        old-locale,
+                        process,
+                        split,
+                        time,
+                        transformers
+
+
+  HS-Source-Dirs:       src, src/Mocp
+
+  Exposed-Modules:      Loh.Types,
+                        Loh.DB,
+                        Loh.Player,
+                        Loh.Scrobbler
+                        Mocp
+
+  GHC-Options:          -Wall

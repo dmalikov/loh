@@ -1,7 +1,9 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE UnicodeSyntax #-}
 
 module Mocp
   ( mocp
+  , Metadata(..), MocpInfo(..), MocpState(..), Song(..)
   ) where
 
 import Control.Applicative ((<$>))
@@ -13,12 +15,52 @@ import Data.List.Split (splitOn)
 import GHC.IO.Exception (ExitCode(..))
 import System.Process (readProcessWithExitCode)
 
-import Types
+type MocpResponse = Either MocpError
 
-getValue ∷ String → MocpResponse → String
+type MocpError = String
+
+data MocpState = Paused | Playing | Stopped
+  deriving (Eq, Show)
+
+type Album  = String
+type Artist = String
+type File   = String
+type Title  = String
+type Track  = String
+
+data Metadata = Metadata
+  { album  ∷ Album
+  , artist ∷ Artist
+  , file   ∷ File
+  , title  ∷ Title
+  , track  ∷ Track
+  } deriving Show
+
+type CurrentSec = Int
+type TotalSec   = Int
+
+data Song = Song
+  { metadata   ∷ Metadata
+  , currentSec ∷ CurrentSec
+  , totalSec   ∷ TotalSec
+  } deriving Show
+
+data MocpInfo = MocpInfo MocpState (Maybe Song)
+  deriving Show
+
+mocp ∷ IO (MocpResponse MocpInfo)
+mocp = (>>= getStatus) <$> runErrorT callMocp
+
+callMocp ∷ ErrorT MocpError IO String
+callMocp = do
+  (exitCode, !response, errorMessage) ← liftIO $ readProcessWithExitCode "mocp" ["-i"] ""
+  when (exitCode /= ExitSuccess) $ throwError errorMessage
+  return response
+
+getValue ∷ String → String → String
 getValue p = (!! 1) . splitOn ": " . head . filter (isPrefixOf p) . lines
 
-getState ∷ MocpResponse → Maybe State
+getState ∷ String → Maybe MocpState
 getState r =
   case getValue "State" r of
     "PAUSE" → Just Paused
@@ -26,7 +68,7 @@ getState r =
     "STOP"  → Just Stopped
     _       → Nothing
 
-getSong ∷ MocpResponse → Maybe Song
+getSong ∷ String → Maybe Song
 getSong r =
   case getState r of
     Nothing      → Nothing
@@ -44,18 +86,9 @@ getSong r =
         , totalSec   = read $ getValue "TotalSec" r
       }
 
-getStatus ∷ MocpResponse → MocpStatus
+getStatus ∷ String → MocpResponse MocpInfo
 getStatus r =
   case getState r of
     Nothing      → Left "Mocp server is not running"
     Just Stopped → Right $ MocpInfo Stopped Nothing
     Just s       → Right $ MocpInfo s $ getSong r
-
-mocp ∷ IO MocpStatus
-mocp = (>>= getStatus) <$> runErrorT callMocp
-
-callMocp ∷ ErrorT MocpError IO MocpResponse
-callMocp = do
-  (exitCode, !response, errorMessage) ← liftIO $ readProcessWithExitCode "mocp" ["-i"] ""
-  when (exitCode /= ExitSuccess) $ throwError errorMessage
-  return response

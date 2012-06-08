@@ -1,3 +1,4 @@
+{-# LANGUAGE UnicodeSyntax #-}
 module Loh.Scrobbler
   ( nowPlaying, scrobbleDB, scrobbleTrack
   ) where
@@ -9,7 +10,7 @@ import Data.Time (formatTime, getCurrentTime)
 import System.Locale (defaultTimeLocale)
 
 import qualified Network.Lastfm as LFM
-import qualified Network.Lastfm.API.Track as Track
+import qualified Network.Lastfm.XML.Track as Track
 
 import Loh.DB (getDB)
 import Loh.Types
@@ -24,14 +25,14 @@ nowPlaying (ak, sk, s) ti =
                            Nothing
                            Nothing
                            Nothing
-                           (Just $ LFM.Duration $ duration ti)
+                           Nothing
                            ak sk s
 
 scrobbleTrack ∷ (LFM.APIKey, LFM.SessionKey, LFM.Secret) → TrackInfo → IO ()
 scrobbleTrack (ak, sk, s) ti = do
     nts ← read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
     void $ left (error . show) <$>
-        Track.scrobble (LFM.Timestamp nts
+        Track.scrobble ( LFM.Timestamp nts
                        , Just $ LFM.Album $ album ti
                        , LFM.Artist $ artist ti
                        , LFM.Track $ track ti
@@ -49,7 +50,7 @@ scrobbleDB (ak, sk, s) = do
   db ← getDB
   forM_ db $ \(DBRecord (Timestamp ts) ti) →
     void $ left (error . show) <$>
-        Track.scrobble (LFM.Timestamp ts
+        Track.scrobble ( LFM.Timestamp ts
                        , Just $ LFM.Album $ album ti
                        , LFM.Artist $ artist ti
                        , LFM.Track $ track ti
