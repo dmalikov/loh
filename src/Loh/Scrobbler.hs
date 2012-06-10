@@ -15,7 +15,7 @@ import qualified Network.Lastfm.XML.Track as Track
 import Loh.DB (getDB)
 import Loh.Types
 
-nowPlaying ∷ (LFM.APIKey, LFM.SessionKey, LFM.Secret) → TrackInfo → IO ()
+nowPlaying ∷ LFMConfig → TrackInfo → IO ()
 nowPlaying (ak, sk, s) ti =
   void $ left (error . show) <$>
     Track.updateNowPlaying (LFM.Artist $ artist ti)
@@ -28,7 +28,7 @@ nowPlaying (ak, sk, s) ti =
                            Nothing
                            ak sk s
 
-scrobbleTrack ∷ (LFM.APIKey, LFM.SessionKey, LFM.Secret) → TrackInfo → IO ()
+scrobbleTrack ∷ LFMConfig → TrackInfo → IO ()
 scrobbleTrack (ak, sk, s) ti = do
     nts ← read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
     void $ left (error . show) <$>
@@ -45,7 +45,7 @@ scrobbleTrack (ak, sk, s) ti = do
                        , Nothing)
                        ak sk s
 
-scrobbleDB ∷ (LFM.APIKey, LFM.SessionKey, LFM.Secret) → IO ()
+scrobbleDB ∷ LFMConfig → IO ()
 scrobbleDB (ak, sk, s) = do
   db ← getDB
   forM_ db $ \(DBRecord (Timestamp ts) ti) →

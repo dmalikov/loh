@@ -18,6 +18,7 @@ getMocpInfo = do
     Right (MOC.MocpInfo MOC.Playing (Just s)) → Just TrackInfo
       { artist = MOC.artist $ MOC.metadata s
       , album = MOC.album $ MOC.metadata s
+      , currentSec = MOC.currentSec s
       , duration = fromIntegral (MOC.currentSec s) / fromIntegral (MOC.totalSec s)
       , track = MOC.track $ MOC.metadata s
       }
@@ -31,13 +32,13 @@ getMpdInfo = do
     Right _ → case MPD.stState <$> status of
       Right MPD.Playing → case maybeSong of
         Right (Just song) → case MPD.stTime <$> status of
-          Right (curTime, totalTime) →
-            Just TrackInfo
-              { artist = fromMaybe "No Artist" $ head <$> M.lookup MPD.Artist tag
-              , album = fromMaybe "No Album" $ head <$> M.lookup MPD.Album tag
-              , duration = curTime / fromIntegral totalTime
-              , track = fromMaybe "No Track" $ head <$> M.lookup MPD.Title tag
-              } where tag = MPD.sgTags song
+          Right (curTime, totalTime) → Just TrackInfo
+            { artist = fromMaybe "No Artist" $ head <$> M.lookup MPD.Artist tag
+            , album = fromMaybe "No Album" $ head <$> M.lookup MPD.Album tag
+            , currentSec = round curTime
+            , duration = curTime / fromIntegral totalTime
+            , track = fromMaybe "No Track" $ head <$> M.lookup MPD.Title tag
+            } where tag = MPD.sgTags song
           _ → Nothing
         _ → Nothing
       _ → Nothing
