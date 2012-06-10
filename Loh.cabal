@@ -36,6 +36,8 @@ Library
                         Loh.DB,
                         Loh.Player,
                         Loh.Scrobbler
+                        Loh
                         Mocp
 
   GHC-Options:          -Wall
+                        -Werror
