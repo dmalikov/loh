@@ -40,4 +40,10 @@ Library
                         Mocp
 
   GHC-Options:          -Wall
-                        -Werror
+                        -fwarn-unused-binds
+                        -fwarn-unused-imports
+                        -fwarn-unused-matches
+
+Executable              loh-get-session
+  Main-is:              loh-get-session.hs
+  HS-Source-Dirs:       tools/
