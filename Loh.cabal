@@ -21,7 +21,7 @@ Library
                         directory,
                         filepath,
                         libmpd == 0.7.2,
-                        liblastfm,
+                        liblastfm >= 0.0.3 && < 0.0.4,
                         mtl,
                         old-locale,
                         process,
@@ -32,10 +32,11 @@ Library
 
   HS-Source-Dirs:       src/libloh, src/libmocp, src/
 
-  Exposed-Modules:      Loh.Types,
-                        Loh.DB,
+  Exposed-Modules:      Loh.DB,
+                        Loh.Eventer,
                         Loh.Player,
-                        Loh.Scrobbler
+                        Loh.Scrobbler,
+                        Loh.Types
                         Loh
                         Mocp
 
