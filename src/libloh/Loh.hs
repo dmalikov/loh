@@ -90,4 +90,3 @@ main = do
       putStrLn $ "currentData: " ++ show currentTracks
       putStrLn $ "get some info:  " ++ show players ++ "\n"
       go config $ updateCurrentTracks config players currentTracks
- 

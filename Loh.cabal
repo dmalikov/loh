@@ -30,7 +30,7 @@ Library
                         transformers
 
 
-  HS-Source-Dirs:       src, src/Mocp
+  HS-Source-Dirs:       src/libloh, src/libmocp, src/
 
   Exposed-Modules:      Loh.Types,
                         Loh.DB,
