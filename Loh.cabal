@@ -33,6 +33,7 @@ Library
 
   Exposed-Modules:      Loh.DB,
                         Loh.Eventer,
+                        Loh.Log,
                         Loh.Player,
                         Loh.Scrobbler,
                         Loh.Types,

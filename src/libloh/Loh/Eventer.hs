@@ -7,12 +7,13 @@ import System.IO.Unsafe
 
 import qualified Data.Map as M
 
+import Loh.Log
 import Loh.Player
 import Loh.Scrobbler
 import Loh.Types
 
 fetchDelay ∷ Int
-fetchDelay = 20 {- delay between players info fetching, sec -}
+fetchDelay = 10 {- delay between players info fetching, sec -}
 
 fetchAccur ∷ Int
 fetchAccur = 3
@@ -36,9 +37,11 @@ manageTrackInfo config new (Just (old, d)) = unsafePerformIO $ do
   if isConsistent old new
     then do
       nowPlaying config new
+      logNowPlaying new
       if isReadyToScrobble d new
         then do
           scrobbleTrack config new
+          logScrobble new
           return (new, Nothing)
         else do
           return (new, d)
@@ -57,6 +60,6 @@ eventer c = eventer' c M.empty
     eventer' config currentTracks = do
       threadDelay $ fetchDelay*1000000
       players ← getPlayersInfo
-      putStrLn $ "currentData: " ++ show currentTracks
-      putStrLn $ "get some info:  " ++ show players ++ "\n"
+      putStrLn $ show currentTracks
+      putStrLn $ show players
       eventer' config $ updateCurrentTracks config players currentTracks
