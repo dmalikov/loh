@@ -2,7 +2,6 @@
 module Loh.Eventer (eventer) where
 
 import Control.Concurrent (threadDelay)
-import Control.Monad (liftM2)
 import Data.Function (on)
 import System.IO.Unsafe
 
@@ -31,26 +30,19 @@ isReadyToScrobble (Just startDuration) ti =
 
 manageTrackInfo ∷ LFMConfig → TrackInfo → Maybe (TrackInfo, Maybe Duration) → (TrackInfo, Maybe Duration)
 manageTrackInfo config new Nothing = unsafePerformIO $ do
-    putStrLn "Second is Nothing"
     nowPlaying config new
-    putStrLn $ "Now playing" ++ show new
     return (new, Just $ duration new)
 manageTrackInfo config new (Just (old, d)) = unsafePerformIO $ do
   if isConsistent old new
     then do
       nowPlaying config new
-      putStrLn $ "Now playing" ++ show new
       if isReadyToScrobble d new
         then do
           scrobbleTrack config new
-          putStrLn $ "Scrobbling" ++ show new
           return (new, Nothing)
         else do
-          print $ liftM2 (-) (Just $ duration new) d
-          print $ scrobbleDuration
           return (new, d)
     else do
-      putStrLn "track changed"
       return (new, Just $ duration new)
 
 intersect ∷ Ord k ⇒ (α → Maybe β → γ) → M.Map k α → M.Map k β → M.Map k γ
