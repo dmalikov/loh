@@ -29,15 +29,13 @@ Library
                         time,
                         transformers
 
-
-  HS-Source-Dirs:       src/libloh, src/libmocp, src/
+  HS-Source-Dirs:       src/libloh/, src/libmocp/, src/
 
   Exposed-Modules:      Loh.DB,
                         Loh.Eventer,
                         Loh.Player,
                         Loh.Scrobbler,
-                        Loh.Types
-                        Loh
+                        Loh.Types,
                         Mocp
 
   GHC-Options:          -Wall
@@ -45,6 +43,12 @@ Library
                         -fwarn-unused-imports
                         -fwarn-unused-matches
 
+
 Executable              loh-get-session
   Main-is:              loh-get-session.hs
   HS-Source-Dirs:       tools/
+
+
+Executable              loh
+  Main-is:              Loh.hs
+  HS-Source-Dirs:       src/libloh/, src/libmocp/

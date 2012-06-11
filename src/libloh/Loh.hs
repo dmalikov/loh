@@ -1,5 +1,5 @@
 {-# LANGUAGE UnicodeSyntax #-}
-module Loh where
+module Main where
 
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad (forever)
