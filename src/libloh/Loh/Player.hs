@@ -32,11 +32,11 @@ getMpdInfo = do
       Right MPD.Playing → case maybeSong of
         Right (Just song) → case MPD.stTime <$> status of
           Right (curTime, totalTime) → Just TrackInfo
-            { artist = fromMaybe "No Artist" $ head <$> M.lookup MPD.Artist tag
-            , album = fromMaybe "No Album" $ head <$> M.lookup MPD.Album tag
+            { artist = fromMaybe "No Artist" $ MPD.toString <$> head <$> M.lookup MPD.Artist tag
+            , album = fromMaybe "No Album" $ MPD.toString <$> head <$> M.lookup MPD.Album tag
             , currentSec = round curTime
             , duration = curTime / fromIntegral totalTime
-            , track = fromMaybe "No Track" $ head <$> M.lookup MPD.Title tag
+            , track = fromMaybe "No Track" $ MPD.toString <$> head <$> M.lookup MPD.Title tag
             } where tag = MPD.sgTags song
           _ → Nothing
         _ → Nothing
