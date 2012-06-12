@@ -40,8 +40,10 @@ manageTrackInfo config new (Just (old, d)) = unsafePerformIO $ do
       logNowPlaying new
       if isReadyToScrobble d new
         then do
-          scrobbleTrack config new
-          logScrobble new
+          st ← scrobbleTrack config new
+          case st of
+            ScrobbleDone → logScrobble new
+            ScrobbleFailed → putStrLn "Scrobble Failed"
           return (new, Nothing)
         else do
           return (new, d)

@@ -28,22 +28,24 @@ nowPlaying (ak, sk, s) ti =
                            Nothing
                            ak sk s
 
-scrobbleTrack ∷ LFMConfig → TrackInfo → IO ()
+scrobbleTrack ∷ LFMConfig → TrackInfo → IO ScrobbleStatus
 scrobbleTrack (ak, sk, s) ti = do
     nts ← read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
-    void $ left (error . show) <$>
-        Track.scrobble ( LFM.Timestamp nts
-                       , Just $ LFM.Album $ album ti
-                       , LFM.Artist $ artist ti
-                       , LFM.Track $ track ti
-                       , Nothing
-                       , Nothing
-                       , Nothing
-                       , Nothing
-                       , Nothing
-                       , Nothing
-                       , Nothing)
-                       ak sk s
+    scrobbleStatus ← Track.scrobble ( LFM.Timestamp nts
+                                    , Just $ LFM.Album $ album ti
+                                    , LFM.Artist $ artist ti
+                                    , LFM.Track $ track ti
+                                    , Nothing
+                                    , Nothing
+                                    , Nothing
+                                    , Nothing
+                                    , Nothing
+                                    , Nothing
+                                    , Nothing)
+                                    ak sk s
+    return $ case scrobbleStatus of
+      Left _ → ScrobbleFailed
+      Right _ → ScrobbleDone
 
 scrobbleDB ∷ LFMConfig → IO ()
 scrobbleDB (ak, sk, s) = do

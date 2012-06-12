@@ -53,3 +53,6 @@ getPlayersInfo = do
     , (Mocp, maybeMocpInfo)
     ]
     where catMaybeSnd = map (second fromJust) . filter (isJust . snd)
+
+getCurrentTracks ∷ IO [TrackInfo]
+getCurrentTracks = M.elems <$> getPlayersInfo

@@ -31,9 +31,11 @@ Library
 
   HS-Source-Dirs:       src/libloh/, src/libmocp/, src/
 
-  Exposed-Modules:      Loh.DB,
+  Exposed-Modules:      Loh.Config,
+                        Loh.DB,
                         Loh.Eventer,
                         Loh.Log,
+                        Loh.LoveTrack,
                         Loh.Player,
                         Loh.Scrobbler,
                         Loh.Types,
@@ -48,6 +50,11 @@ Library
 Executable              loh-get-session
   Main-is:              loh-get-session.hs
   HS-Source-Dirs:       tools/
+
+
+Executable              loh-lovetrack-np
+  Main-is:              loh-lovetrack-np.hs
+  HS-Source-Dirs:       src/libloh/, src/libmocp/, tools/
 
 
 Executable              loh

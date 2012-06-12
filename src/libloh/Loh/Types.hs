@@ -42,3 +42,5 @@ type PlayersInfo = M.Map PlayerName TrackInfo
 type PlayersInfoToScrobble = M.Map PlayerName (TrackInfo, Maybe Duration)
 
 type LFMConfig = (LFM.APIKey, LFM.SessionKey, LFM.Secret)
+
+data ScrobbleStatus = ScrobbleDone | ScrobbleFailed
