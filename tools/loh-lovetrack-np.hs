@@ -12,8 +12,8 @@ main ∷ IO ()
 main = do
   config ← getConfig
   currentTracks ← getCurrentTracks
-  case length currentTracks of
-    0 → putStrLn "Error: Nothing to love"
-    _ → forM_ currentTracks $ \t → do
+  if null currentTracks
+    then putStrLn "Error: Nothing to love"
+    else forM_ currentTracks $ \t → do
       loveTrack config t
       putStrLn $ "Loved " ++ (artist t) ++ " - " ++ (track t)
