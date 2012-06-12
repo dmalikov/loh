@@ -16,4 +16,4 @@ main = do
     then putStrLn "Error: Nothing to love"
     else forM_ currentTracks $ \t → do
       loveTrack config t
-      putStrLn $ "Loved " ++ (artist t) ++ " - " ++ (track t)
+      putStrLn $ "Loved " ++ artist t ++ " - " ++ track t

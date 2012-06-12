@@ -33,7 +33,7 @@ manageTrackInfo ∷ LFMConfig → TrackInfo → Maybe (TrackInfo, Maybe Duration
 manageTrackInfo config new Nothing = do
     nowPlaying config new
     return (new, Just $ duration new)
-manageTrackInfo config new (Just (old, d)) = do
+manageTrackInfo config new (Just (old, d)) =
   if isConsistent old new
     then do
       nowPlaying config new
@@ -45,9 +45,9 @@ manageTrackInfo config new (Just (old, d)) = do
             ScrobbleDone → logScrobble new
             ScrobbleFailed → putStrLn "Scrobble Failed"
           return (new, Nothing)
-        else do
+        else
           return (new, d)
-    else do
+    else
       return (new, Just $ duration new)
 
 intersect ∷ Ord k ⇒ (α → Maybe β → γ) → M.Map k α → M.Map k β → M.Map k γ
