@@ -3,7 +3,7 @@ module Loh.Eventer (eventer) where
 
 import Control.Concurrent (threadDelay)
 import Data.Function (on)
-import System.IO.Unsafe
+import Data.Traversable (sequenceA)
 
 import qualified Data.Map as M
 
@@ -29,11 +29,11 @@ isReadyToScrobble Nothing _ = False
 isReadyToScrobble (Just startDuration) ti =
   duration ti - startDuration > scrobbleDuration
 
-manageTrackInfo ∷ LFMConfig → TrackInfo → Maybe (TrackInfo, Maybe Duration) → (TrackInfo, Maybe Duration)
-manageTrackInfo config new Nothing = unsafePerformIO $ do
+manageTrackInfo ∷ LFMConfig → TrackInfo → Maybe (TrackInfo, Maybe Duration) → IO (TrackInfo, Maybe Duration)
+manageTrackInfo config new Nothing = do
     nowPlaying config new
     return (new, Just $ duration new)
-manageTrackInfo config new (Just (old, d)) = unsafePerformIO $ do
+manageTrackInfo config new (Just (old, d)) = do
   if isConsistent old new
     then do
       nowPlaying config new
@@ -53,8 +53,8 @@ manageTrackInfo config new (Just (old, d)) = unsafePerformIO $ do
 intersect ∷ Ord k ⇒ (α → Maybe β → γ) → M.Map k α → M.Map k β → M.Map k γ
 intersect f ma mb = M.mapWithKey (\k a → f a (M.lookup k mb)) ma
 
-updateCurrentTracks ∷ LFMConfig → PlayersInfo → PlayersInfoToScrobble → PlayersInfoToScrobble
-updateCurrentTracks c = intersect (manageTrackInfo c)
+updateCurrentTracks ∷ LFMConfig → PlayersInfo → PlayersInfoToScrobble → IO PlayersInfoToScrobble
+updateCurrentTracks c newP oldP = sequenceA $ intersect (manageTrackInfo c) newP oldP
 
 eventer ∷ LFMConfig → IO α
 eventer c = eventer' c M.empty
@@ -62,6 +62,5 @@ eventer c = eventer' c M.empty
     eventer' config currentTracks = do
       threadDelay $ fetchDelay*1000000
       players ← getPlayersInfo
-      putStrLn $ show currentTracks
-      putStrLn $ show players
-      eventer' config $ updateCurrentTracks config players currentTracks
+      updatedTracks ← updateCurrentTracks config players currentTracks
+      eventer' config updatedTracks
