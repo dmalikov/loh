@@ -1,4 +1,3 @@
-{-# LANGUAGE UnicodeSyntax #-}
 module Main where
 
 import Control.Monad (forever)

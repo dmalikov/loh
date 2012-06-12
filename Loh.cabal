@@ -41,6 +41,8 @@ Library
                         Loh.Types,
                         Mocp
 
+  Extensions:           UnicodeSyntax
+
   GHC-Options:          -Wall
                         -fwarn-unused-binds
                         -fwarn-unused-imports
@@ -50,13 +52,16 @@ Library
 Executable              loh-get-session
   Main-is:              loh-get-session.hs
   HS-Source-Dirs:       tools/
+  Extensions:           UnicodeSyntax
 
 
 Executable              loh-lovetrack-np
   Main-is:              loh-lovetrack-np.hs
   HS-Source-Dirs:       src/libloh/, src/libmocp/, tools/
+  Extensions:           UnicodeSyntax
 
 
 Executable              loh
   Main-is:              Loh.hs
   HS-Source-Dirs:       src/libloh/, src/libmocp/
+  Extensions:           UnicodeSyntax

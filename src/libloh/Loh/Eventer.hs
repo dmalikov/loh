@@ -1,4 +1,3 @@
-{-# LANGUAGE UnicodeSyntax #-}
 module Loh.Eventer (eventer) where
 
 import Control.Concurrent (threadDelay)

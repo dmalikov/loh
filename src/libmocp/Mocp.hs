@@ -1,6 +1,4 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE UnicodeSyntax #-}
-
 module Mocp
   ( mocp
   , Metadata(..), MocpInfo(..), MocpState(..), Song(..)

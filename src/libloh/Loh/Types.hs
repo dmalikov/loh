@@ -1,5 +1,4 @@
 {-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE UnicodeSyntax #-}
 module Loh.Types where
 
 import Data.Function (on)

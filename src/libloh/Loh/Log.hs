@@ -1,4 +1,3 @@
-{-# LANGUAGE UnicodeSyntax #-}
 module Loh.Log
   ( logNowPlaying
   , logScrobble

@@ -1,4 +1,3 @@
-{-# LANGUAGE UnicodeSyntax #-}
 module Loh.Config (getConfig) where
 
 import Control.Applicative ((<$>), (<*>))

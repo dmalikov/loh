@@ -1,8 +1,3 @@
-#!/usr/bin/env runhaskell
-{- Another example of using liblastfm.
- - It simplifies Session Key retrieval.
- -}
-
 import Control.Applicative ((<$>))
 import Control.Arrow ((|||))
 import Network.Lastfm
@@ -20,17 +15,17 @@ parseArgs xs
   | not $ null xs = error "Usage: ./loh-get-session.hs"
   | otherwise = xs
 
-main :: IO ()
+main ∷ IO ()
 main = do
   let apiKey = APIKey ak
       secret = Secret s
-  confFilePath <- (</> confFile) <$> getHomeDirectory
-  token <- getToken <$> Auth.getToken apiKey
+  confFilePath ← (</> confFile) <$> getHomeDirectory
+  token ← getToken <$> Auth.getToken apiKey
   putStrLn $ "Authorize your token: " ++ Auth.getAuthorizeTokenLink apiKey token
-  _ <- getChar
-  sk <- getSession <$> Auth.getSession apiKey token secret
+  _ ← getChar
+  sk ← getSession <$> Auth.getSession apiKey token secret
   writeFile confFilePath $ printf "APIKey = %s\nSessionKey = %s\nSecret = %s\n" ak sk s
   putStrLn $ "Session key is successfuly written to " ++ confFilePath
     where
       getToken = error . show ||| id
-      getSession = error . show ||| (\(SessionKey t) -> t)
+      getSession = error . show ||| (\(SessionKey t) → t)

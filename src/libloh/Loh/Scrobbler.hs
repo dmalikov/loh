@@ -1,4 +1,3 @@
-{-# LANGUAGE UnicodeSyntax #-}
 module Loh.Scrobbler
   ( nowPlaying, scrobbleDB, scrobbleTrack
   ) where
