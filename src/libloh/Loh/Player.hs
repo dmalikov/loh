@@ -1,7 +1,7 @@
 module Loh.Player where
 
 import Control.Arrow (second)
-import Control.Applicative ((<$>))
+import Control.Applicative ((<$>), (<*>))
 import Control.Monad (mfilter)
 import Data.Function (on)
 import Data.Maybe (fromJust, fromMaybe, isJust)
@@ -25,25 +25,29 @@ getMocpInfo = do
       }
     _ → Nothing
 
+formatMPDTrackInfo ∷ (MPD.Song, (Double, MPD.Seconds)) → Maybe TrackInfo
+formatMPDTrackInfo (song, (curTime, totalTime)) = Just $ TrackInfo
+  { artist = fromMaybe "No Artist" $ getTag MPD.Artist
+  , album = fromMaybe "No Album" $ getTag MPD.Album
+  , currentSec = round curTime
+  , duration = curTime / fromIntegral totalTime
+  , track = fromMaybe "No Track" $ getTag MPD.Title
+  } where
+      getTag τ = MPD.toString . head <$> M.lookup τ (MPD.sgTags song)
+
 getMpdInfo ∷ IO (Maybe TrackInfo)
 getMpdInfo = do
   info ← (liftFstMaybe . toMaybe) <$> getInfo
-  return $ mfilter isPlaying info >>= getTime >>= formatTrackInfo
-    where getInfo = MPD.withMPD $ do
-            maybeSong ← MPD.currentSong
-            status ← MPD.status
-            return (maybeSong, status)
-          toMaybe = either (const Nothing) Just
-          liftFstMaybe m = do { (ma, b) <- m ; a <- ma ; return (a, b) }
-          isPlaying (_, status) = (MPD.stState $ status) == MPD.Playing
-          getTime (song',status) = Just (song', MPD.stTime $ status)
-          formatTrackInfo (song, (curTime, totalTime)) = Just $ TrackInfo
-            { artist = fromMaybe "No Artist" $ MPD.toString . head <$> M.lookup MPD.Artist tag
-            , album = fromMaybe "No Album" $ MPD.toString . head <$> M.lookup MPD.Album tag
-            , currentSec = round curTime
-            , duration = curTime / fromIntegral totalTime
-            , track = fromMaybe "No Track" $ MPD.toString . head <$> M.lookup MPD.Title tag
-            } where tag = MPD.sgTags song
+  return $ mfilter isPlaying info >>= getTime >>= formatMPDTrackInfo
+    where
+      getInfo = MPD.withMPD $ (,) <$> MPD.currentSong <*> MPD.status
+      toMaybe = either (const Nothing) Just
+      liftFstMaybe m = do
+        (ma, b) ← m
+        a ← ma
+        return (a, b)
+      isPlaying = (== MPD.Playing) . MPD.stState . snd
+      getTime (song, status) = Just (song, MPD.stTime status)
 
 getPlayersInfo ∷ IO PlayersInfo
 getPlayersInfo = do
