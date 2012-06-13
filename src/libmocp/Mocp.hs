@@ -1,6 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
 module Mocp
-  ( mocp
+  ( getMocpInfo
   , Metadata(..), MocpInfo(..), MocpState(..), Song(..)
   ) where
 
@@ -43,11 +43,13 @@ data Song = Song
   , totalSec   ∷ TotalSec
   } deriving Show
 
-data MocpInfo = MocpInfo MocpState (Maybe Song)
-  deriving Show
+data MocpInfo = MocpInfo
+  { state ∷ MocpState
+  , song ∷ Maybe Song
+  } deriving Show
 
-mocp ∷ IO (MocpResponse MocpInfo)
-mocp = (>>= getStatus) <$> runErrorT callMocp
+getMocpInfo ∷ IO (MocpResponse MocpInfo)
+getMocpInfo = (>>= getStatus) <$> runErrorT callMocp
 
 callMocp ∷ ErrorT MocpError IO String
 callMocp = do
