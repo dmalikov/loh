@@ -15,6 +15,12 @@ import qualified Network.MPD as MPD
 eitherToMaybe ∷ Either α β → Maybe β
 eitherToMaybe = either (const Nothing) Just
 
+liftFstMaybe ∷ Monad μ ⇒ μ (μ α, β) → μ (α, β)
+liftFstMaybe m = do
+  (ma, b) ← m
+  a ← ma
+  return (a, b)
+
 formatMOCTrackInfo ∷ MOC.Song → TrackInfo
 formatMOCTrackInfo s = TrackInfo
   { artist = MOC.artist $ MOC.metadata s
@@ -28,8 +34,7 @@ getMocpInfo ∷ IO (Maybe TrackInfo)
 getMocpInfo = do
   info ← eitherToMaybe <$> MOC.getMocpInfo
   return $ return . formatMOCTrackInfo =<< MOC.song =<< mfilter isPlaying info
-    where
-      isPlaying = (== MOC.Playing) . MOC.state
+    where isPlaying = (== MOC.Playing) . MOC.state
 
 formatMPDTrackInfo ∷ (MPD.Song, (Double, MPD.Seconds)) → TrackInfo
 formatMPDTrackInfo (song, (curTime, totalTime)) = TrackInfo
@@ -38,21 +43,14 @@ formatMPDTrackInfo (song, (curTime, totalTime)) = TrackInfo
   , currentSec = round curTime
   , duration = curTime / fromIntegral totalTime
   , track = fromMaybe "No Track" $ getTag MPD.Title
-  } where
-      getTag τ = MPD.toString . head <$> M.lookup τ (MPD.sgTags song)
+  } where getTag τ = MPD.toString . head <$> M.lookup τ (MPD.sgTags song)
 
 getMpdInfo ∷ IO (Maybe TrackInfo)
 getMpdInfo = do
   info ← (liftFstMaybe . eitherToMaybe) <$> getInfo
-  return $ formatMPDTrackInfo . getTime <$> mfilter isPlaying info
-    where
-      getInfo = MPD.withMPD $ (,) <$> MPD.currentSong <*> MPD.status
-      liftFstMaybe m = do
-        (ma, b) ← m
-        a ← ma
-        return (a, b)
-      isPlaying = (== MPD.Playing) . MPD.stState . snd
-      getTime (song, status) = (song, MPD.stTime status)
+  return $ formatMPDTrackInfo . second MPD.stTime <$> mfilter isPlaying info
+    where getInfo = MPD.withMPD $ (,) <$> MPD.currentSong <*> MPD.status
+          isPlaying = (== MPD.Playing) . MPD.stState . snd
 
 getPlayersInfo ∷ IO PlayersInfo
 getPlayersInfo = do
