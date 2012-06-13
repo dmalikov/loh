@@ -2,7 +2,7 @@ module Loh.Player where
 
 import Control.Arrow (second)
 import Control.Applicative ((<$>), (<*>))
-import Control.Monad (join, mfilter)
+import Control.Monad (mfilter)
 import Data.Function (on)
 import Data.Maybe (fromJust, fromMaybe, isJust)
 
@@ -27,10 +27,9 @@ formatMOCTrackInfo s = TrackInfo
 getMocpInfo ∷ IO (Maybe TrackInfo)
 getMocpInfo = do
   info ← eitherToMaybe <$> MOC.getMocpInfo
-  return $ return . formatMOCTrackInfo =<< join . getSong =<< mfilter isPlaying info
+  return $ return . formatMOCTrackInfo =<< MOC.song =<< mfilter isPlaying info
     where
       isPlaying = (== MOC.Playing) . MOC.state
-      getSong = return . MOC.song
 
 formatMPDTrackInfo ∷ (MPD.Song, (Double, MPD.Seconds)) → TrackInfo
 formatMPDTrackInfo (song, (curTime, totalTime)) = TrackInfo
