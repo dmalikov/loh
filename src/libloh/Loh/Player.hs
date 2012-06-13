@@ -15,8 +15,8 @@ import qualified Network.MPD as MPD
 eitherToMaybe ∷ Either α β → Maybe β
 eitherToMaybe = either (const Nothing) Just
 
-formatMOCTrackInfo ∷ MOC.Song → Maybe TrackInfo
-formatMOCTrackInfo s = Just $ TrackInfo
+formatMOCTrackInfo ∷ MOC.Song → TrackInfo
+formatMOCTrackInfo s = TrackInfo
   { artist = MOC.artist $ MOC.metadata s
   , album = MOC.album $ MOC.metadata s
   , currentSec = MOC.currentSec s
@@ -27,13 +27,13 @@ formatMOCTrackInfo s = Just $ TrackInfo
 getMocpInfo ∷ IO (Maybe TrackInfo)
 getMocpInfo = do
   info ← eitherToMaybe <$> MOC.getMocpInfo
-  return (mfilter isPlaying info >>= (join . getSong) >>= formatMOCTrackInfo)
+  return $ return . formatMOCTrackInfo =<< join . getSong =<< mfilter isPlaying info
     where
       isPlaying = (== MOC.Playing) . MOC.state
       getSong = return . MOC.song
 
-formatMPDTrackInfo ∷ (MPD.Song, (Double, MPD.Seconds)) → Maybe TrackInfo
-formatMPDTrackInfo (song, (curTime, totalTime)) = Just $ TrackInfo
+formatMPDTrackInfo ∷ (MPD.Song, (Double, MPD.Seconds)) → TrackInfo
+formatMPDTrackInfo (song, (curTime, totalTime)) = TrackInfo
   { artist = fromMaybe "No Artist" $ getTag MPD.Artist
   , album = fromMaybe "No Album" $ getTag MPD.Album
   , currentSec = round curTime
@@ -45,7 +45,7 @@ formatMPDTrackInfo (song, (curTime, totalTime)) = Just $ TrackInfo
 getMpdInfo ∷ IO (Maybe TrackInfo)
 getMpdInfo = do
   info ← (liftFstMaybe . eitherToMaybe) <$> getInfo
-  return $ mfilter isPlaying info >>= getTime >>= formatMPDTrackInfo
+  return $ formatMPDTrackInfo . getTime <$> mfilter isPlaying info
     where
       getInfo = MPD.withMPD $ (,) <$> MPD.currentSong <*> MPD.status
       liftFstMaybe m = do
@@ -53,7 +53,7 @@ getMpdInfo = do
         a ← ma
         return (a, b)
       isPlaying = (== MPD.Playing) . MPD.stState . snd
-      getTime (song, status) = Just (song, MPD.stTime status)
+      getTime (song, status) = (song, MPD.stTime status)
 
 getPlayersInfo ∷ IO PlayersInfo
 getPlayersInfo = do
