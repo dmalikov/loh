@@ -5,10 +5,9 @@ module Loh.DB
   ) where
 
 import Control.Applicative ((<$>))
-import Data.Time (formatTime, getCurrentTime)
+import Data.Time (getCurrentTime)
 import System.Directory (getHomeDirectory)
 import System.FilePath ((</>))
-import System.Locale (defaultTimeLocale)
 
 import Loh.Types
 
@@ -20,11 +19,11 @@ dbFile = (</> dbFilename) <$> getHomeDirectory
 
 store ∷ TrackInfo → IO ()
 store ti = do
-  ts ← Timestamp <$> read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
+  ts ← getCurrentTime
   flip appendFile (show (DBRecord ts ti) ++ "\n") =<< dbFile
 
 clear ∷ IO ()
 clear = flip writeFile "" =<< dbFile
 
 getDB ∷ IO [DBRecord]
-getDB = map read . lines <$> (readFile =<< dbFile)
+getDB = map read . filter (not . null) . lines <$> (readFile =<< dbFile)

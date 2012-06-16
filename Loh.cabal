@@ -62,6 +62,12 @@ Executable              loh-lovetrack-np
   Extensions:           UnicodeSyntax
 
 
+Executable              loh-db
+  Main-is:              loh-db.hs
+  HS-Source-Dirs:       src/libloh/, src/libmocp/, tools/
+  Extensions:           UnicodeSyntax
+
+
 Executable              loh
   Main-is:              Loh.hs
   HS-Source-Dirs:       src/libloh/, src/libmocp/
