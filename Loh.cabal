@@ -34,6 +34,7 @@ Library
   Exposed-Modules:      Loh.Config,
                         Loh.DB,
                         Loh.Eventer,
+                        Loh.Format,
                         Loh.Log,
                         Loh.LoveTrack,
                         Loh.Player,
