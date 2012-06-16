@@ -14,52 +14,54 @@ import qualified Network.Lastfm.XML.Track as Track
 import Loh.DB (getDB)
 import Loh.Types
 
-nowPlaying ∷ LFMConfig → TrackInfo → IO ()
+toScrobbleStatus ∷ Either α β → ScrobbleStatus
+toScrobbleStatus =
+  either (const ScrobbleFailed) (const ScrobbleDone)
+
+nowPlaying ∷ LFMConfig → TrackInfo → IO ScrobbleStatus
 nowPlaying (ak, sk, s) ti =
-  void $ left (error . show) <$>
-    Track.updateNowPlaying (LFM.Artist $ artist ti)
-                           (LFM.Track $ track ti)
-                           (Just $ LFM.Album $ album ti)
-                           Nothing
-                           Nothing
-                           Nothing
-                           Nothing
-                           Nothing
-                           ak sk s
+  toScrobbleStatus <$> Track.updateNowPlaying
+    (LFM.Artist $ artist ti)
+    (LFM.Track $ track ti)
+    (Just $ LFM.Album $ album ti)
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+    Nothing
+    ak sk s
 
 scrobbleTrack ∷ LFMConfig → TrackInfo → IO ScrobbleStatus
 scrobbleTrack (ak, sk, s) ti = do
-    nts ← read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
-    scrobbleStatus ← Track.scrobble ( LFM.Timestamp nts
-                                    , Just $ LFM.Album $ album ti
-                                    , LFM.Artist $ artist ti
-                                    , LFM.Track $ track ti
-                                    , Nothing
-                                    , Nothing
-                                    , Nothing
-                                    , Nothing
-                                    , Nothing
-                                    , Nothing
-                                    , Nothing)
-                                    ak sk s
-    return $ case scrobbleStatus of
-      Left _ → ScrobbleFailed
-      Right _ → ScrobbleDone
+  nts ← read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
+  toScrobbleStatus <$> Track.scrobble
+    ( LFM.Timestamp nts
+    , Just $ LFM.Album $ album ti
+    , LFM.Artist $ artist ti
+    , LFM.Track $ track ti
+    , Nothing
+    , Nothing
+    , Nothing
+    , Nothing
+    , Nothing
+    , Nothing
+    , Nothing
+    ) ak sk s
 
 scrobbleDB ∷ LFMConfig → IO ()
 scrobbleDB (ak, sk, s) = do
   db ← getDB
   forM_ db $ \(DBRecord (Timestamp ts) ti) →
-    void $ left (error . show) <$>
-        Track.scrobble ( LFM.Timestamp ts
-                       , Just $ LFM.Album $ album ti
-                       , LFM.Artist $ artist ti
-                       , LFM.Track $ track ti
-                       , Nothing
-                       , Nothing
-                       , Nothing
-                       , Nothing
-                       , Nothing
-                       , Nothing
-                       , Nothing)
-                       ak sk s
+    void $ left (error . show) <$> Track.scrobble
+      ( LFM.Timestamp ts
+      , Just $ LFM.Album $ album ti
+      , LFM.Artist $ artist ti
+      , LFM.Track $ track ti
+      , Nothing
+      , Nothing
+      , Nothing
+      , Nothing
+      , Nothing
+      , Nothing
+      , Nothing
+      ) ak sk s
