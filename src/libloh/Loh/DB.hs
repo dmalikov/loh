@@ -1,7 +1,6 @@
 module Loh.DB
   ( clear
   , getDB
-  , getDBSize
   , store
   ) where
 
@@ -29,6 +28,3 @@ clear = flip writeFile "" =<< dbFile
 
 getDB ∷ IO [DBRecord]
 getDB = map read . lines <$> (readFile =<< dbFile)
-
-getDBSize ∷ IO DBSize
-getDBSize = (DBSize . length) <$> getDB

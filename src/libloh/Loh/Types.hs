@@ -9,9 +9,6 @@ import qualified Network.Lastfm as LFM
 newtype Timestamp = Timestamp Integer
   deriving (Read, Show)
 
-newtype DBSize = DBSize Int
-  deriving (Read, Show)
-
 type Album = String
 type Artist = String
 type Duration = Double
