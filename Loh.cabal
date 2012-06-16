@@ -13,7 +13,7 @@ Maintainer:             Dmitry Malikov <malikov.d.y@gmail.com>
 
 Build-type:             Simple
 Cabal-version:          >= 1.6
-Homepage:               -
+Homepage:               https://github.com/dmalikov/loh
 
 Library
   Build-Depends:        base >= 3 && < 5,
