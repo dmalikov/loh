@@ -21,19 +21,14 @@ dbFile = (</> dbFilename) <$> getHomeDirectory
 
 store ∷ TrackInfo → IO ()
 store ti = do
-  dbFile' ← dbFile
   ts ← Timestamp <$> read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
-  appendFile dbFile' $ show (DBRecord ts ti) ++ "\n"
+  flip appendFile (show (DBRecord ts ti) ++ "\n") =<< dbFile
 
 clear ∷ IO ()
-clear = do
-  dbFile' ← dbFile
-  writeFile dbFile' ""
+clear = flip writeFile "" =<< dbFile
 
 getDB ∷ IO [DBRecord]
-getDB = do
-  records ← lines <$> (readFile =<< dbFile)
-  return $ map read records
+getDB = map read . lines <$> (readFile =<< dbFile)
 
 getDBSize ∷ IO DBSize
 getDBSize = (DBSize . length) <$> getDB
