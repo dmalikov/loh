@@ -2,15 +2,19 @@ module Loh.Eventer (eventer) where
 
 import Control.Concurrent (threadDelay)
 import Data.Function (on)
-import Data.Traversable (sequenceA)
-
-import qualified Data.Map as M
 
 import Loh.DB
 import Loh.Log
-import Loh.Player
+import Loh.InfoMocp
+import Loh.InfoMpd
 import Loh.Scrobbler
 import Loh.Types
+
+toSecs ∷ Int → Int
+toSecs = (* 1000000)
+
+threadDelayS ∷ Int → IO ()
+threadDelayS = threadDelay . toSecs
 
 fetchDelay ∷ Int
 fetchDelay = 20 {- delay between players info fetching, secs -}
@@ -18,66 +22,38 @@ fetchDelay = 20 {- delay between players info fetching, secs -}
 fetchAccur ∷ Int
 fetchAccur = 3
 
-scrobbleDuration ∷ Duration
-scrobbleDuration = 0.51
-
-isConsistent ∷ TrackInfo → TrackInfo → Bool
-isConsistent α β =
-  α == β && abs (((-) `on` currentSec) α β) < fetchDelay + fetchAccur
-
-isReadyToScrobble ∷ Maybe Duration → TrackInfo → Bool
-isReadyToScrobble Nothing _ = False
-isReadyToScrobble (Just startDuration) ti =
-  duration ti - startDuration > scrobbleDuration
-
-manageTrackInfo ∷ LFMConfig
-                → TrackInfo
-                → Maybe (TrackInfo, Maybe Duration)
-                → IO (TrackInfo, Maybe Duration)
-manageTrackInfo config new Nothing = do
-    _ ← nowPlaying config new
-    return (new, Just $ duration new)
-manageTrackInfo config new (Just (old, d)) =
-  if isConsistent old new
-    then do
-      -- logMessage "Trying update now playing"
-      stnp ← nowPlaying config new
-      -- logMessage "Finished updating now playing"
+servePlayer ∷ LFMConfig → IO (Maybe TrackInfo) → Maybe TrackInfo → IO α
+servePlayer c getPlayerInfo maybeOldTrack = do
+  logMessage $ show maybeOldTrack
+  threadDelayS fetchDelay
+  logMessage "delay ended"
+  maybeNewTrack ← getPlayerInfo
+  case maybeNewTrack of
+    Just new | maybeNewTrack == maybeOldTrack → do
+      stnp ← nowPlaying c new
       case stnp of
         ScrobbleDone → logNowPlaying new
         ScrobbleFailed → logNowPlayingFailed new
-      if isReadyToScrobble d new
-        then do
-          -- logMessage "Trying scroblle"
-          st ← scrobbleTrack config new
-          -- logMessage "Finished scrobble"
-          case st of
-            ScrobbleDone → logScrobble new
-            ScrobbleFailed → do
-              logScrobbleFailed new
-              logDBStore new
-              store new
-          return (new, Nothing)
-        else
-          return (new, d)
-    else
-      return (new, Just $ duration new)
+      -- if there is a point of waiting to scrobble
+      if 2 * currentSec new >= totalSec new
+        then servePlayer c getPlayerInfo maybeNewTrack
+        else do
+          let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
+          logMessage $ "waiting " ++ show delayToScrobble ++ " toScrobble"
+          threadDelayS delayToScrobble
+          trackInfo ← getPlayerInfo
+          case trackInfo of
+            Just freshNew | new == freshNew && (subtract `on` currentSec) freshNew new < delayToScrobble + fetchAccur → do
+              st ← scrobbleTrack c freshNew
+              case st of
+                ScrobbleDone → logScrobble freshNew
+                ScrobbleFailed → do
+                  logScrobbleFailed freshNew
+                  logDBStore freshNew
+                  store freshNew
+              servePlayer c getPlayerInfo Nothing
+            _ → servePlayer c getPlayerInfo trackInfo
+    _ → servePlayer c getPlayerInfo maybeNewTrack
 
-intersect ∷ Ord k ⇒ (α → Maybe β → γ) → M.Map k α → M.Map k β → M.Map k γ
-intersect f ma mb = M.mapWithKey (\k a → f a (M.lookup k mb)) ma
-
-updateCurrentTracks ∷ LFMConfig
-                    → PlayersInfo
-                    → PlayersInfoToScrobble
-                    → IO PlayersInfoToScrobble
-updateCurrentTracks c newP oldP =
-  sequenceA $ intersect (manageTrackInfo c) newP oldP
-
-eventer ∷ LFMConfig → IO α
-eventer c = eventer' c M.empty
-  where
-    eventer' config currentTracks = do
-      threadDelay $ fetchDelay*1000000
-      players ← getPlayersInfo
-      updatedTracks ← updateCurrentTracks config players currentTracks
-      eventer' config updatedTracks
+eventer ∷ LFMConfig → IO ()
+eventer c = servePlayer c getMpdInfo Nothing

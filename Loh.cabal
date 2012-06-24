@@ -37,7 +37,9 @@ Library
                         Loh.Format,
                         Loh.Log,
                         Loh.LoveTrack,
-                        Loh.Player,
+                        Loh.InfoKludges,
+                        Loh.InfoMocp,
+                        Loh.InfoMpd,
                         Loh.Scrobbler,
                         Loh.Types,
                         Mocp
@@ -53,12 +55,6 @@ Library
 Executable              loh-get-session
   Main-is:              loh-get-session.hs
   HS-Source-Dirs:       tools/
-  Extensions:           UnicodeSyntax
-
-
-Executable              loh-lovetrack-np
-  Main-is:              loh-lovetrack-np.hs
-  HS-Source-Dirs:       src/libloh/, src/libmocp/, tools/
   Extensions:           UnicodeSyntax
 
 

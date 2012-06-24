@@ -6,4 +6,4 @@ import Loh.Config
 import Loh.Eventer
 
 main ∷ IO ()
-main = forever $ eventer =<< getConfig
+main = eventer =<< getConfig

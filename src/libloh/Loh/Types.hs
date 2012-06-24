@@ -9,7 +9,6 @@ import qualified Network.Lastfm as LFM
 
 type Album = String
 type Artist = String
-type Duration = Double
 type Sec = Int
 type Track = String
 
@@ -17,7 +16,7 @@ data TrackInfo = TrackInfo
   { album      ∷ Album
   , artist     ∷ Artist
   , currentSec ∷ Sec
-  , duration   ∷ Duration
+  , totalSec   ∷ Sec
   , track      ∷ Track
   } deriving (Read, Show)
 
@@ -35,7 +34,6 @@ data PlayerName = Mocp | Mpd
   deriving (Eq, Ord, Read, Show)
 
 type PlayersInfo = M.Map PlayerName TrackInfo
-type PlayersInfoToScrobble = M.Map PlayerName (TrackInfo, Maybe Duration)
 
 type LFMConfig = (LFM.APIKey, LFM.SessionKey, LFM.Secret)
 
