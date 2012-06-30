@@ -18,4 +18,29 @@ Then you should configure Loh. Add name of the players that you wanna Loh lookin
     $> echo "Mocp" >> ~/.lohrc
 
 Start Loh:
+
     $> loh
+
+## Loh-db
+Loh-db is an utility to manage tracks that failed scrobbling. For example, you are offline, and Loh said:
+
+    2012-06-30 [22:17:10]: [Mpd] now playing "The Legendary Pink Dots - King of a Small World" failed
+    2012-06-30 [22:18:40]: [Mpd] scrobbling "The Legendary Pink Dots - King of a Small World" failed 
+    2012-06-30 [22:18:40]: [Mpd] stored in DB "The Legendary Pink Dots - King of a Small World"
+
+Loh store unscrobbled track:
+
+    $> loh-db list
+    1 tracks stored:
+    "The Legendary Pink Dots - King of a Small World" played June 30, 22:18
+
+So when you get internet connection you can scrobble it with `loh-db push`:
+
+    $> loh-db push
+    (1/1) scrobbled "The Legendary Pink Dots - King of a Small World", done
+    Total: DB pushing is done
+
+And db is empty now:
+
+    $> loh-db list
+    0 tracks stored:
