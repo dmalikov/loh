@@ -23,22 +23,22 @@ logMessage ρ s = do
   time ← getTime
   printf logMessageFormat time (show $ name ρ) s
 
-log_ ∷ String → TrackInfo → IO ()
-log_ formatString τ = do
+log_ ∷ String → Player → TrackInfo → IO ()
+log_ formatString ρ τ = do
   time ← getTime
-  printf formatString time (artist τ) (track τ)
+  printf formatString time (show $ name ρ) (artist τ) (track τ)
 
-logNowPlaying ∷ TrackInfo → IO ()
+logNowPlaying ∷ Player → TrackInfo → IO ()
 logNowPlaying = log_ logNowPlayingFormat
 
-logNowPlayingFailed ∷ TrackInfo → IO ()
+logNowPlayingFailed ∷ Player → TrackInfo → IO ()
 logNowPlayingFailed = log_ logNowPlayingFailedFormat
 
-logScrobble ∷ TrackInfo → IO ()
+logScrobble ∷ Player → TrackInfo → IO ()
 logScrobble = log_ logScrobbleFormat
 
-logScrobbleFailed ∷ TrackInfo → IO ()
+logScrobbleFailed ∷ Player → TrackInfo → IO ()
 logScrobbleFailed = log_ logScrobbleFailedFormat
 
-logDBStore ∷ TrackInfo → IO ()
+logDBStore ∷ Player → TrackInfo → IO ()
 logDBStore = log_ logDBStoreFormat
