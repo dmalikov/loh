@@ -43,14 +43,14 @@ servePlayer c ρ maybeOldTrack = do
   maybeNewTrack ← getInfo ρ
   case maybeNewTrack of
     Just new | maybeNewTrack == maybeOldTrack → do
-      stnp ← nowPlaying c new
-      case stnp of
-        ScrobbleDone → logNowPlaying new
-        ScrobbleFailed → logNowPlayingFailed new
       -- if there is a point of waiting to scrobble
       if 2 * currentSec new >= totalSec new
         then servePlayer c ρ maybeNewTrack
         else do
+          stnp ← nowPlaying c new
+          case stnp of
+            ScrobbleDone → logNowPlaying new
+            ScrobbleFailed → logNowPlayingFailed new
           let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
           -- logMessage ρ $ "waiting " ++ show delayToScrobble ++ " toScrobble"
           isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
