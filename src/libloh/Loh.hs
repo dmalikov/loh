@@ -1,6 +1,6 @@
 module Main where
 
-import Loh.Config
+import Loh.LFMConfig
 import Loh.Eventer
 
 main ∷ IO ()

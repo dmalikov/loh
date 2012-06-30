@@ -8,7 +8,7 @@ import System.Environment (getArgs)
 import System.Locale (defaultTimeLocale)
 import Text.Printf
 
-import Loh.Config
+import Loh.LFMConfig
 import Loh.DB
 import Loh.Scrobbler
 import Loh.Types

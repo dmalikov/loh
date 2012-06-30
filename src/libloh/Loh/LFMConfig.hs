@@ -1,4 +1,4 @@
-module Loh.Config (getConfig) where
+module Loh.LFMConfig (getConfig) where
 
 import Control.Applicative ((<$>), (<*>))
 import Data.Char (isSpace)
