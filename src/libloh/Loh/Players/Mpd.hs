@@ -1,11 +1,11 @@
-module Loh.InfoMpd (getMpdInfo) where
+module Loh.Players.Mpd (getMpdInfo) where
 
 import Control.Arrow (second)
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad (mfilter)
 import Data.Maybe (fromMaybe)
 
-import Loh.InfoKludges
+import Loh.Players.Kludges
 import Loh.Types
 
 import qualified Data.Map as M

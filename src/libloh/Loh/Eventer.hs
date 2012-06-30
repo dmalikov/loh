@@ -1,13 +1,12 @@
 module Loh.Eventer (eventer) where
 
 import Control.Concurrent (forkIO, threadDelay)
-import Control.Monad (forever)
+import Control.Monad (forever, void)
 import Data.Function (on)
 
+import Loh.Config
 import Loh.DB
 import Loh.Log
-import Loh.InfoMocp
-import Loh.InfoMpd
 import Loh.Scrobbler
 import Loh.Types
 
@@ -22,27 +21,27 @@ fetchAccur ∷ Int
 fetchAccur = 3
 
 -- | Fetch player for specific trackInfo until it will be able to scrobble
-followUntilReadyToScrobble ∷ IO (Maybe TrackInfo) → TrackInfo → Int → IO Bool
-followUntilReadyToScrobble getPlayerInfo ti timeToFollow
+followUntilReadyToScrobble ∷ Player → TrackInfo → Int → IO Bool
+followUntilReadyToScrobble ρ ti timeToFollow
   | timeToFollow < 0 = return True
   | otherwise = do
     logMessage $ "following... " ++ show timeToFollow ++ " to complete"
     threadDelayS fetchDelay
-    trackInfo' ← getPlayerInfo
+    trackInfo' ← getInfo ρ
     case trackInfo' of
       Nothing → return False
       Just newti → do
         let diff = (subtract `on` currentSec) ti newti ∷ Int
         if newti == ti && abs (diff - fetchDelay) < fetchAccur
-          then followUntilReadyToScrobble getPlayerInfo newti $ timeToFollow - fetchDelay
+          then followUntilReadyToScrobble ρ newti $ timeToFollow - fetchDelay
           else return False
 
-servePlayer ∷ LFMConfig → IO (Maybe TrackInfo) → Maybe TrackInfo → IO α
-servePlayer c getPlayerInfo maybeOldTrack = do
+servePlayer ∷ LFMConfig → Player → Maybe TrackInfo → IO ()
+servePlayer c player maybeOldTrack = do
   logMessage $ show maybeOldTrack
   threadDelayS fetchDelay
   logMessage "delay ended"
-  maybeNewTrack ← getPlayerInfo
+  maybeNewTrack ← getInfo player
   case maybeNewTrack of
     Just new | maybeNewTrack == maybeOldTrack → do
       stnp ← nowPlaying c new
@@ -51,11 +50,11 @@ servePlayer c getPlayerInfo maybeOldTrack = do
         ScrobbleFailed → logNowPlayingFailed new
       -- if there is a point of waiting to scrobble
       if 2 * currentSec new >= totalSec new
-        then servePlayer c getPlayerInfo maybeNewTrack
+        then servePlayer c player maybeNewTrack
         else do
           let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
           logMessage $ "waiting " ++ show delayToScrobble ++ " toScrobble"
-          isSameTrack ← followUntilReadyToScrobble getPlayerInfo new delayToScrobble
+          isSameTrack ← followUntilReadyToScrobble player new delayToScrobble
           if isSameTrack
             then do
               st ← scrobbleTrack c new
@@ -65,15 +64,12 @@ servePlayer c getPlayerInfo maybeOldTrack = do
                   logScrobbleFailed new
                   logDBStore new
                   store new
-              servePlayer c getPlayerInfo Nothing
+              servePlayer c player Nothing
             else
-              servePlayer c getPlayerInfo Nothing
-    _ → servePlayer c getPlayerInfo maybeNewTrack
+              servePlayer c player Nothing
+    _ → servePlayer c player maybeNewTrack
 
 eventer ∷ LFMConfig → IO ()
 eventer c = do
-  mapM_ (forkIO . (\ρ → servePlayer c ρ Nothing)) $
-    [ getMocpInfo
-    , getMpdInfo
-    ]
+  mapM_ (void . forkIO . (\ρ → servePlayer c ρ Nothing)) =<< getPlayers
   forever $ threadDelayS 1

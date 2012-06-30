@@ -30,10 +30,13 @@ data DBRecord = DBRecord
   , trackInfo ∷ TrackInfo
   } deriving (Read, Show)
 
+data Player = Player
+  { name ∷ PlayerName
+  , getInfo ∷ IO (Maybe TrackInfo)
+  }
+
 data PlayerName = Mocp | Mpd
   deriving (Eq, Ord, Read, Show)
-
-type PlayersInfo = M.Map PlayerName TrackInfo
 
 type LFMConfig = (LFM.APIKey, LFM.SessionKey, LFM.Secret)
 

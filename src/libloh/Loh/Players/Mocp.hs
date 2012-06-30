@@ -1,9 +1,9 @@
-module Loh.InfoMocp (getMocpInfo) where
+module Loh.Players.Mocp (getMocpInfo) where
 
 import Control.Applicative ((<$>))
 import Control.Monad (mfilter)
 
-import Loh.InfoKludges
+import Loh.Players.Kludges
 import Loh.Types
 
 import qualified Mocp as MOC

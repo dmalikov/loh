@@ -31,15 +31,17 @@ Library
 
   HS-Source-Dirs:       src/libloh/, src/libmocp/, src/
 
-  Exposed-Modules:      Loh.LFMConfig,
+  Exposed-Modules:      Loh.Config,
                         Loh.DB,
                         Loh.Eventer,
                         Loh.Format,
+                        Loh.LFMConfig,
                         Loh.Log,
                         Loh.LoveTrack,
-                        Loh.InfoKludges,
-                        Loh.InfoMocp,
-                        Loh.InfoMpd,
+                        Loh.Players,
+                        Loh.Players.Kludges,
+                        Loh.Players.Mocp,
+                        Loh.Players.Mpd,
                         Loh.Scrobbler,
                         Loh.Types,
                         Mocp
