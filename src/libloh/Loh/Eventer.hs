@@ -25,7 +25,7 @@ followUntilReadyToScrobble ∷ Player → TrackInfo → Int → IO Bool
 followUntilReadyToScrobble ρ ti timeToFollow
   | timeToFollow < 0 = return True
   | otherwise = do
-    logMessage ρ $ "following... " ++ show timeToFollow ++ " to complete"
+    -- logMessage ρ $ "following... " ++ show timeToFollow ++ " to complete"
     threadDelayS fetchDelay
     trackInfo' ← getInfo ρ
     case trackInfo' of
@@ -38,7 +38,7 @@ followUntilReadyToScrobble ρ ti timeToFollow
 
 servePlayer ∷ LFMConfig → Player → Maybe TrackInfo → IO ()
 servePlayer c ρ maybeOldTrack = do
-  logMessage ρ $ "currect track is " ++ show maybeOldTrack
+  -- logMessage ρ $ "currect track is " ++ show maybeOldTrack
   threadDelayS fetchDelay
   maybeNewTrack ← getInfo ρ
   case maybeNewTrack of
@@ -52,7 +52,7 @@ servePlayer c ρ maybeOldTrack = do
         then servePlayer c ρ maybeNewTrack
         else do
           let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
-          logMessage ρ $ "waiting " ++ show delayToScrobble ++ " toScrobble"
+          -- logMessage ρ $ "waiting " ++ show delayToScrobble ++ " toScrobble"
           isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
           if isSameTrack
             then do
@@ -70,5 +70,7 @@ servePlayer c ρ maybeOldTrack = do
 
 eventer ∷ LFMConfig → IO ()
 eventer c = do
-  mapM_ (void . forkIO . (\ρ → servePlayer c ρ Nothing)) =<< getPlayers
+  players ← getPlayers
+  putStrLn $ "Start scrobbling " ++ (show $ map name players)
+  mapM_ (void . forkIO . (\ρ → servePlayer c ρ Nothing)) players
   forever $ threadDelayS 1
