@@ -25,7 +25,7 @@ followUntilReadyToScrobble ∷ Player → TrackInfo → Int → IO Bool
 followUntilReadyToScrobble ρ ti timeToFollow
   | timeToFollow < 0 = return True
   | otherwise = do
-    logMessage $ "following... " ++ show timeToFollow ++ " to complete"
+    logMessage ρ $ "following... " ++ show timeToFollow ++ " to complete"
     threadDelayS fetchDelay
     trackInfo' ← getInfo ρ
     case trackInfo' of
@@ -37,11 +37,10 @@ followUntilReadyToScrobble ρ ti timeToFollow
           else return False
 
 servePlayer ∷ LFMConfig → Player → Maybe TrackInfo → IO ()
-servePlayer c player maybeOldTrack = do
-  logMessage $ show maybeOldTrack
+servePlayer c ρ maybeOldTrack = do
+  logMessage ρ $ "currect track is " ++ show maybeOldTrack
   threadDelayS fetchDelay
-  logMessage "delay ended"
-  maybeNewTrack ← getInfo player
+  maybeNewTrack ← getInfo ρ
   case maybeNewTrack of
     Just new | maybeNewTrack == maybeOldTrack → do
       stnp ← nowPlaying c new
@@ -50,11 +49,11 @@ servePlayer c player maybeOldTrack = do
         ScrobbleFailed → logNowPlayingFailed new
       -- if there is a point of waiting to scrobble
       if 2 * currentSec new >= totalSec new
-        then servePlayer c player maybeNewTrack
+        then servePlayer c ρ maybeNewTrack
         else do
           let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
-          logMessage $ "waiting " ++ show delayToScrobble ++ " toScrobble"
-          isSameTrack ← followUntilReadyToScrobble player new delayToScrobble
+          logMessage ρ $ "waiting " ++ show delayToScrobble ++ " toScrobble"
+          isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
           if isSameTrack
             then do
               st ← scrobbleTrack c new
@@ -64,10 +63,10 @@ servePlayer c player maybeOldTrack = do
                   logScrobbleFailed new
                   logDBStore new
                   store new
-              servePlayer c player Nothing
+              servePlayer c ρ Nothing
             else
-              servePlayer c player Nothing
-    _ → servePlayer c player maybeNewTrack
+              servePlayer c ρ Nothing
+    _ → servePlayer c ρ maybeNewTrack
 
 eventer ∷ LFMConfig → IO ()
 eventer c = do

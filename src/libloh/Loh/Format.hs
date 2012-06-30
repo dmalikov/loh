@@ -16,7 +16,7 @@ logDBStoreFormat ∷ String
 logDBStoreFormat = "%s: stored in DB \"%s - %s\"\n"
 
 logMessageFormat ∷ String
-logMessageFormat = "%s: %s\n"
+logMessageFormat = "%s: [%s] %s\n"
 
 timeFormat ∷ String
 timeFormat = "%F [%T]"

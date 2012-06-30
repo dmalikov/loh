@@ -18,10 +18,10 @@ import Loh.Types
 getTime ∷ IO String
 getTime = formatTime defaultTimeLocale timeFormat <$> getCurrentTime
 
-logMessage ∷ String → IO ()
-logMessage s = do
+logMessage ∷ Player → String → IO ()
+logMessage ρ s = do
   time ← getTime
-  printf logMessageFormat time s
+  printf logMessageFormat time (show $ name ρ) s
 
 log_ ∷ String → TrackInfo → IO ()
 log_ formatString τ = do
