@@ -1,10 +1,12 @@
 module Loh.Eventer (eventer) where
 
-import Control.Concurrent (threadDelay)
+import Control.Concurrent (forkIO, threadDelay)
+import Control.Monad (forever)
 import Data.Function (on)
 
 import Loh.DB
 import Loh.Log
+import Loh.InfoMocp
 import Loh.InfoMpd
 import Loh.Scrobbler
 import Loh.Types
@@ -69,4 +71,9 @@ servePlayer c getPlayerInfo maybeOldTrack = do
     _ → servePlayer c getPlayerInfo maybeNewTrack
 
 eventer ∷ LFMConfig → IO ()
-eventer c = servePlayer c getMpdInfo Nothing
+eventer c = do
+  mapM_ (forkIO . (\ρ → servePlayer c ρ Nothing)) $
+    [ getMocpInfo
+    , getMpdInfo
+    ]
+  forever $ threadDelayS 1

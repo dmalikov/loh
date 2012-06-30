@@ -1,7 +1,5 @@
 module Main where
 
-import Control.Monad (forever)
-
 import Loh.Config
 import Loh.Eventer
 
