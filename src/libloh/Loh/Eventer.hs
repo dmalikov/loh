@@ -25,7 +25,7 @@ followUntilReadyToScrobble ∷ Player → TrackInfo → Int → IO Bool
 followUntilReadyToScrobble ρ ti timeToFollow
   | timeToFollow < 0 = return True
   | otherwise = do
-    -- logMessage ρ $ "following... " ++ show timeToFollow ++ " to complete"
+    -- logMessageP ρ $ "following... " ++ show timeToFollow ++ " to complete"
     threadDelayS fetchDelay
     trackInfo' ← getInfo ρ
     case trackInfo' of
@@ -38,7 +38,7 @@ followUntilReadyToScrobble ρ ti timeToFollow
 
 servePlayer ∷ LFMConfig → Player → Maybe TrackInfo → IO ()
 servePlayer c ρ maybeOldTrack = do
-  -- logMessage ρ $ "currect track is " ++ show maybeOldTrack
+  -- logMessageP ρ $ "currect track is " ++ show maybeOldTrack
   threadDelayS fetchDelay
   maybeNewTrack ← getInfo ρ
   case maybeNewTrack of
@@ -52,7 +52,7 @@ servePlayer c ρ maybeOldTrack = do
             ScrobbleDone → logNowPlaying ρ new
             ScrobbleFailed → logNowPlayingFailed ρ new
           let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
-          -- logMessage ρ $ "waiting " ++ show delayToScrobble ++ " toScrobble"
+          -- logMessageP ρ $ "waiting " ++ show delayToScrobble ++ " toScrobble"
           isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
           if isSameTrack
             then do

@@ -5,6 +5,7 @@ module Loh.Log
   , logScrobbleFailed
   , logDBStore
   , logMessage
+  , logMessageP
   ) where
 
 import Control.Applicative ((<$>))
@@ -18,10 +19,15 @@ import Loh.Types
 getTime ∷ IO String
 getTime = formatTime defaultTimeLocale timeFormat <$> getCurrentTime
 
-logMessage ∷ Player → String → IO ()
-logMessage ρ s = do
+logMessage ∷ String → IO ()
+logMessage s = do
   time ← getTime
-  printf logMessageFormat time (show $ name ρ) s
+  printf logMessageFormat time s
+
+logMessageP ∷ Player → String → IO ()
+logMessageP ρ s = do
+  time ← getTime
+  printf logMessagePFormat time (show $ name ρ) s
 
 log_ ∷ String → Player → TrackInfo → IO ()
 log_ formatString ρ τ = do
