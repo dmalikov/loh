@@ -25,7 +25,7 @@ nowPlaying (ak, sk, s) ti =
     Nothing
     Nothing
     Nothing
-    Nothing
+    (Just $ LFM.Duration $ totalSec ti)
     ak sk s
 
 scrobbleTrack ∷ LFMConfig → TrackInfo → IO ScrobbleStatus
