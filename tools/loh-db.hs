@@ -13,6 +13,15 @@ import Loh.DB
 import Loh.Scrobbler
 import Loh.Types
 
+main ∷ IO ()
+main = do
+  action ← take 1 <$> getArgs
+  case action of
+    ["clear"] → dbClear
+    ["list"] → dbList
+    ["push"] → dbPush
+    _ → dbHelp
+
 dbList ∷ IO ()
 dbList = do
   db ← getDB
@@ -27,7 +36,7 @@ dbPush = do
   config ← getConfig
   db ← getDB
   let recordsNumber = length db
-  statuses ← forM (zip db [1..]) $ \((DBRecord ts ti), recordNumber) → do
+  statuses ← forM (zip db [1..]) $ \((DBRecord _ ti), recordNumber) → do
     status ← scrobbleTrack config ti
     let statusString = case status of
           ScrobbleFailed → "failed"
@@ -56,13 +65,5 @@ dbHelp = putStrLn . intercalate "\n" $
   , "\t list: list DB contents"
   , ""
   , "\t push: scrobble all tracks from DB"
+  , ""
   ]
-
-main ∷ IO ()
-main = do
-  action ← take 1 <$> getArgs
-  case action of
-    ["clear"] → dbClear
-    ["list"] → dbList
-    ["push"] → dbPush
-    _ → dbHelp
