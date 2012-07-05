@@ -1,5 +1,5 @@
-module Loh.Scrobbler
-  ( nowPlaying, scrobbleTrack
+module Loh.LastFM.Method
+  ( loveTrack, nowPlaying, scrobbleTrack
   ) where
 
 import Control.Applicative ((<$>))
@@ -11,13 +11,20 @@ import qualified Network.Lastfm.XML.Track as Track
 
 import Loh.Types
 
-toScrobbleStatus ∷ Either α β → ScrobbleStatus
-toScrobbleStatus =
-  either (const ScrobbleFailed) (const ScrobbleDone)
+toLFMStatus ∷ Either α β → LFMOperationStatus
+toLFMStatus =
+  either (const OperationFailed) (const OperationDone)
 
-nowPlaying ∷ LFMConfig → TrackInfo → IO ScrobbleStatus
+loveTrack ∷ LFMConfig → TrackInfo → IO LFMOperationStatus
+loveTrack (ak, sk, s) ti =
+  toLFMStatus <$> Track.love
+    (LFM.Artist $ artist ti)
+    (LFM.Track $ track ti)
+    ak sk s
+
+nowPlaying ∷ LFMConfig → TrackInfo → IO LFMOperationStatus
 nowPlaying (ak, sk, s) ti =
-  toScrobbleStatus <$> Track.updateNowPlaying
+  toLFMStatus <$> Track.updateNowPlaying
     (LFM.Artist $ artist ti)
     (LFM.Track $ track ti)
     (Just $ LFM.Album $ album ti)
@@ -28,10 +35,10 @@ nowPlaying (ak, sk, s) ti =
     (Just $ LFM.Duration $ totalSec ti)
     ak sk s
 
-scrobbleTrack ∷ LFMConfig → TrackInfo → IO ScrobbleStatus
+scrobbleTrack ∷ LFMConfig → TrackInfo → IO LFMOperationStatus
 scrobbleTrack (ak, sk, s) ti = do
   nts ← read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
-  toScrobbleStatus <$> Track.scrobble
+  toLFMStatus <$> Track.scrobble
     ( LFM.Timestamp nts
     , Just $ LFM.Album $ album ti
     , LFM.Artist $ artist ti

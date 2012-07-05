@@ -4,7 +4,6 @@ module Loh.Types where
 import Data.Function (on)
 import Data.Time (UTCTime(..))
 
-import qualified Data.Map as M
 import qualified Network.Lastfm as LFM
 
 type Album = String
@@ -40,5 +39,5 @@ data PlayerName = Mocp | Mpd
 
 type LFMConfig = (LFM.APIKey, LFM.SessionKey, LFM.Secret)
 
-data ScrobbleStatus = ScrobbleDone | ScrobbleFailed
+data LFMOperationStatus = OperationDone | OperationFailed
   deriving (Eq)

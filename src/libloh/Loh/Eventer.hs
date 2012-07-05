@@ -6,8 +6,8 @@ import Data.Function (on)
 
 import Loh.Config
 import Loh.DB
+import Loh.LastFM.Method
 import Loh.Log
-import Loh.Scrobbler
 import Loh.Types
 
 threadDelayS ∷ Int → IO ()
@@ -49,8 +49,8 @@ servePlayer c ρ maybeOldTrack = do
         else do
           stnp ← nowPlaying c new
           case stnp of
-            ScrobbleDone → logNowPlaying ρ new
-            ScrobbleFailed → logNowPlayingFailed ρ new
+            OperationDone → logNowPlaying ρ new
+            OperationFailed → logNowPlayingFailed ρ new
           let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
           -- logMessageP ρ $ "waiting " ++ show delayToScrobble ++ " toScrobble"
           isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
@@ -58,8 +58,8 @@ servePlayer c ρ maybeOldTrack = do
             then do
               st ← scrobbleTrack c new
               case st of
-                ScrobbleDone → logScrobble ρ new
-                ScrobbleFailed → do
+                OperationDone → logScrobble ρ new
+                OperationFailed → do
                   logScrobbleFailed ρ new
                   logDBStore ρ new
                   store new

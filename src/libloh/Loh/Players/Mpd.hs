@@ -22,7 +22,7 @@ formatMPDTrackInfo (song, (curTime, totalTime)) = TrackInfo
 
 getMpdInfo ∷ IO (Maybe TrackInfo)
 getMpdInfo = do
-  info ← (liftFstMaybe . eitherToMaybe) <$> getInfo
+  info ← (liftFstMaybe . eitherToMaybe) <$> getInfo'
   return $ formatMPDTrackInfo . second MPD.stTime <$> mfilter isPlaying info
-    where getInfo = MPD.withMPD $ (,) <$> MPD.currentSong <*> MPD.status
+    where getInfo' = MPD.withMPD $ (,) <$> MPD.currentSong <*> MPD.status
           isPlaying = (== MPD.Playing) . MPD.stState . snd

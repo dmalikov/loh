@@ -35,14 +35,13 @@ Library
                         Loh.DB,
                         Loh.Eventer,
                         Loh.Format,
-                        Loh.LFMConfig,
+                        Loh.LastFM.Config,
+                        Loh.LastFM.Method,
                         Loh.Log,
-                        Loh.LoveTrack,
                         Loh.Players,
                         Loh.Players.Kludges,
                         Loh.Players.Mocp,
                         Loh.Players.Mpd,
-                        Loh.Scrobbler,
                         Loh.Types,
                         Mocp
 

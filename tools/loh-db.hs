@@ -8,9 +8,9 @@ import System.Environment (getArgs)
 import System.Locale (defaultTimeLocale)
 import Text.Printf
 
-import Loh.LFMConfig
 import Loh.DB
-import Loh.Scrobbler
+import Loh.LastFM.Config
+import Loh.LastFM.Method
 import Loh.Types
 
 main ∷ IO ()
@@ -39,12 +39,12 @@ dbPush = do
   statuses ← forM (zip db [1..]) $ \((DBRecord _ ti), recordNumber) → do
     status ← scrobbleTrack config ti
     let statusString = case status of
-          ScrobbleFailed → "failed"
-          ScrobbleDone → "done"
+          OperationFailed → "failed"
+          OperationDone → "done"
     printf "(%d/%d) scrobbled \"%s - %s\", %s\n"
       (recordNumber∷Int) recordsNumber (artist ti) (track ti) statusString
     return status
-  if (not . null . filter (== ScrobbleFailed) $ statuses)
+  if (not . null . filter (== OperationFailed) $ statuses)
     then
       putStrLn "Total: DB pushing is failed"
     else do
