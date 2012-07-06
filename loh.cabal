@@ -1,4 +1,4 @@
-Name:                   Loh
+Name:                   loh
 Version:                0.0.0
 Category:               Network
 Description:            LastFMScrobbler on Haskell
@@ -45,7 +45,8 @@ Library
                         Loh.Types,
                         Mocp
 
-  Extensions:           UnicodeSyntax
+  Extensions:           UnicodeSyntax,
+                        TypeSynonymInstances
 
   GHC-Options:          -Wall
                         -fwarn-unused-binds
