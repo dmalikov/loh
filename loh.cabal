@@ -26,8 +26,7 @@ Library
                         old-locale,
                         process,
                         split,
-                        time,
-                        transformers
+                        time
 
   HS-Source-Dirs:       src/libloh/, src/libmocp/, src/
 
@@ -48,9 +47,6 @@ Library
   Extensions:           UnicodeSyntax
 
   GHC-Options:          -Wall
-                        -fwarn-unused-binds
-                        -fwarn-unused-imports
-                        -fwarn-unused-matches
 
 
 Executable              loh-get-session
