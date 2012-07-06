@@ -45,8 +45,7 @@ Library
                         Loh.Types,
                         Mocp
 
-  Extensions:           UnicodeSyntax,
-                        TypeSynonymInstances
+  Extensions:           UnicodeSyntax
 
   GHC-Options:          -Wall
                         -fwarn-unused-binds
