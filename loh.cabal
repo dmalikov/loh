@@ -21,7 +21,7 @@ Library
                         directory,
                         filepath,
                         libmpd >= 0.8 && < 0.9,
-                        liblastfm >= 0.0.3 && < 0.0.4,
+                        liblastfm >= 0.0.3.3 && < 0.0.4,
                         mtl,
                         old-locale,
                         process,
