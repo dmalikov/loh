@@ -7,7 +7,7 @@ import Data.Time (formatTime, getCurrentTime)
 import System.Locale (defaultTimeLocale)
 
 import qualified Network.Lastfm as LFM
-import qualified Network.Lastfm.XML.Track as Track
+import qualified Network.Lastfm.JSON.Track as Track
 
 import Loh.Types
 
