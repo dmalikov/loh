@@ -6,8 +6,7 @@ module Mocp
 
 import Control.Applicative ((<$>))
 import Control.Monad (when)
-import Control.Monad.Error (ErrorT(..), runErrorT, throwError)
-import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Error (ErrorT(..), liftIO, runErrorT, throwError)
 import Data.List (isPrefixOf)
 import Data.List.Split (splitOn)
 import GHC.IO.Exception (ExitCode(..))
