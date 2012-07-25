@@ -1,3 +1,5 @@
+{-# LANGUAGE UnicodeSyntax #-}
+
 import Control.Applicative ((<$>))
 import Control.Arrow ((|||))
 import Network.Lastfm
@@ -6,7 +8,8 @@ import System.FilePath ((</>))
 import Text.Printf (printf)
 import qualified Network.Lastfm.XML.Auth as Auth
 
-confFile = ".lastfm.conf"
+import Loh.Config (LConfig(..), writeConfig)
+
 
 ak = "34a538d1ce307a257c695bcc7e031392"
 s  = "4bd6283d6441cdf842d03ba8ab7a6ddf"
@@ -19,13 +22,12 @@ main ∷ IO ()
 main = do
   let apiKey = APIKey ak
       secret = Secret s
-  confFilePath ← (</> confFile) <$> getHomeDirectory
   token ← getToken <$> Auth.getToken apiKey
   putStrLn $ "Authorize your token: " ++ Auth.getAuthorizeTokenLink apiKey token
   _ ← getChar
   sk ← getSession <$> Auth.getSession apiKey token secret
-  writeFile confFilePath $ printf "APIKey = %s\nSessionKey = %s\nSecret = %s\n" ak sk s
-  putStrLn $ "Session key is successfuly written to " ++ confFilePath
+  writeConfig LConfig { players = [], lfmConfig = (APIKey ak, SessionKey sk, Secret s) }
+  putStrLn $ "Session key is successfuly written to ~/.lohrc"
     where
       getToken = error . show ||| id
       getSession = error . show ||| (\(SessionKey t) → t)
