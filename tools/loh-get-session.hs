@@ -3,9 +3,6 @@
 import Control.Applicative ((<$>))
 import Control.Arrow ((|||))
 import Network.Lastfm
-import System.Directory (getHomeDirectory)
-import System.FilePath ((</>))
-import Text.Printf (printf)
 import qualified Network.Lastfm.XML.Auth as Auth
 
 import Loh.Config (LConfig(..), writeConfig)

@@ -4,7 +4,7 @@ import Control.Concurrent (forkIO, threadDelay)
 import Control.Monad (forever, void)
 import Data.Function (on)
 
-import Loh.Config (LConfig(..), readConfig, writeConfig)
+import Loh.Config (LConfig(..), readConfig)
 import Loh.DB
 import Loh.LastFM.Method
 import Loh.Log
@@ -73,7 +73,6 @@ eventer = do
   config ← readConfig
   let c = lfmConfig config
       ps = players config
-  writeConfig config
   putStrLn $ "Start scrobbling " ++ (show $ map name ps)
   mapM_ (void . forkIO . (\ρ → servePlayer c ρ Nothing)) ps
   forever $ threadDelayS 1
