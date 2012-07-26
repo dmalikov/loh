@@ -4,7 +4,7 @@ import Control.Concurrent (forkIO, threadDelay)
 import Control.Monad (forever, void)
 import Data.Function (on)
 
-import Loh.Config
+import Loh.Config (LConfig(..))
 import Loh.DB
 import Loh.LastFM.Method
 import Loh.Log
@@ -68,9 +68,10 @@ servePlayer c ρ maybeOldTrack = do
               servePlayer c ρ Nothing
     _ → servePlayer c ρ maybeNewTrack
 
-eventer ∷ LFMConfig → IO ()
-eventer c = do
-  players ← getPlayers
-  putStrLn $ "Start scrobbling " ++ (show $ map name players)
-  mapM_ (void . forkIO . (\ρ → servePlayer c ρ Nothing)) players
+eventer ∷ LConfig → IO ()
+eventer config = do
+  let c = lfmConfig config
+      ps = players config
+  putStrLn $ "Start scrobbling " ++ (show $ map name ps)
+  mapM_ (void . forkIO . (\ρ → servePlayer c ρ Nothing)) ps
   forever $ threadDelayS 1

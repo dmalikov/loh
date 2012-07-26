@@ -1,7 +1,7 @@
 module Main where
 
+import Loh.Config (readConfig)
 import Loh.Eventer
-import Loh.LastFM.Config
 
 main ∷ IO ()
-main = eventer =<< getConfig
+main = eventer =<< readConfig

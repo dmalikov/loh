@@ -26,7 +26,9 @@ Library
                         old-locale,
                         process,
                         split,
-                        time
+                        time,
+                        aeson,
+                        bytestring
 
   HS-Source-Dirs:       src/libloh/, src/libmocp/, src/
 
@@ -34,7 +36,6 @@ Library
                         Loh.DB,
                         Loh.Eventer,
                         Loh.Format,
-                        Loh.LastFM.Config,
                         Loh.LastFM.Method,
                         Loh.Log,
                         Loh.Players,
@@ -51,13 +52,13 @@ Library
 
 Executable              loh-get-session
   Main-is:              loh-get-session.hs
-  HS-Source-Dirs:       tools/
+  HS-Source-Dirs:       tools/, src/libloh/, src/libmocp/
   Extensions:           UnicodeSyntax
 
 
 Executable              loh-db
   Main-is:              loh-db.hs
-  HS-Source-Dirs:       src/libloh/, tools/
+  HS-Source-Dirs:       tools/, src/libloh/, src/libmocp/
   Extensions:           UnicodeSyntax
 
 

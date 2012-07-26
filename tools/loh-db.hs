@@ -9,7 +9,7 @@ import System.Locale (defaultTimeLocale)
 import Text.Printf
 
 import Loh.DB
-import Loh.LastFM.Config
+import Loh.Config (LConfig(..), readConfig)
 import Loh.LastFM.Method
 import Loh.Types
 
@@ -33,11 +33,11 @@ dbList = do
 
 dbPush ∷ IO ()
 dbPush = do
-  config ← getConfig
+  config ← readConfig
   db ← getDB
   let recordsNumber = length db
   statuses ← forM (zip db [1..]) $ \((DBRecord _ ti), recordNumber) → do
-    status ← scrobbleTrack config ti
+    status ← scrobbleTrack (lfmConfig config) ti
     let statusString = case status of
           OperationFailed → "failed"
           OperationDone → "done"
