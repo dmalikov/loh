@@ -18,9 +18,9 @@ import Loh.Types
 
 
 data LConfig = LConfig
-                 { players ∷ [Player]
-                 , lfmConfig ∷ LFMConfig
-                 }
+  { players ∷ [Player]
+  , lfmConfig ∷ LFMConfig
+  }
 
 
 instance FromJSON LConfig where

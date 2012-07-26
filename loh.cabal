@@ -58,7 +58,7 @@ Executable              loh-get-session
 
 Executable              loh-db
   Main-is:              loh-db.hs
-  HS-Source-Dirs:       src/libloh/, src/libmocp/, tools/
+  HS-Source-Dirs:       tools/, src/libloh/, src/libmocp/
   Extensions:           UnicodeSyntax
 
 
