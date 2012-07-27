@@ -28,7 +28,10 @@ Library
                         split,
                         time,
                         aeson,
-                        bytestring
+                        bytestring,
+                        vector,
+                        text,
+                        unordered-containers
 
   HS-Source-Dirs:       src/libloh/, src/libmocp/, src/
 

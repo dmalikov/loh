@@ -5,13 +5,21 @@ module Loh.Config
   ) where
 
 import Control.Applicative ((<$>), empty)
+import Data.List (intersperse)
+import Data.Monoid ((<>), mconcat)
 import System.IO (IOMode(ReadMode), withFile)
 
-import Data.Aeson
+import Data.Aeson hiding (encode)
+import qualified Data.Aeson.Encode as A (fromValue)
 import qualified Data.ByteString.Lazy as B
+import qualified Data.HashMap.Strict as H (toList)
+import Data.Text (Text)
+import Data.Text.Lazy.Builder (Builder, toLazyText)
+import Data.Text.Lazy.Encoding (encodeUtf8)
+import qualified Data.Vector as V (toList)
 import System.Directory (getHomeDirectory)
 import System.FilePath ((</>))
-import Network.Lastfm
+import Network.Lastfm hiding (Value)
 
 import Loh.Players
 import Loh.Types
@@ -55,7 +63,33 @@ writeConfig ∷ LConfig → IO ()
 writeConfig config =
   do hd ← getHomeDirectory
      B.writeFile (hd </> configFileName) (encode config)
+ where
+  encode = encodeUtf8 . toLazyText . fromValue 0 . toJSON
+
 
 
 configFileName ∷ String
 configFileName = ".lohrc"
+
+
+fromValue ∷ Int → Value → Builder
+fromValue indent (Array v) = fromComplex indent ("[","]") fromValue (V.toList v)
+fromValue indent (Object m) = fromComplex indent ("{","}") fromKeyValue (H.toList m)
+fromValue _ v = A.fromValue v
+
+
+fromComplex ∷ Int → (Builder, Builder) → (Int → a → Builder) → [a] → Builder
+fromComplex _ (delimL,delimR) _ [] = delimL <> delimR
+fromComplex indent (delimL,delimR) fromItem items =
+  mconcat [delimL, "\n", items', "\n", fromIndent indent, delimR]
+ where
+  items' = mconcat . intersperse ",\n" $
+    map (\item → fromIndent (succ indent) <> fromItem (succ indent) item) items
+
+
+fromKeyValue ∷ Int → (Text, Value) → Builder
+fromKeyValue indent (k,v) = A.fromValue (toJSON k) <> ": " <> fromValue indent v
+
+
+fromIndent ∷ Int → Builder
+fromIndent = mconcat . flip replicate "  "
