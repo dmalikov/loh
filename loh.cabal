@@ -53,12 +53,6 @@ Library
   GHC-Options:          -Wall
 
 
-Executable              loh-get-session
-  Main-is:              loh-get-session.hs
-  HS-Source-Dirs:       tools/, src/libloh/, src/libmocp/
-  Extensions:           UnicodeSyntax
-
-
 Executable              loh-db
   Main-is:              loh-db.hs
   HS-Source-Dirs:       tools/, src/libloh/, src/libmocp/
