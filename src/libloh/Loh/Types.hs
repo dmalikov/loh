@@ -6,6 +6,7 @@ import Data.Time (UTCTime(..))
 
 import qualified Network.Lastfm as LFM
 
+
 type Album = String
 type Artist = String
 type Sec = Int

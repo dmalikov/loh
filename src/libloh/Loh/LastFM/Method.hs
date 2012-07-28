@@ -11,9 +11,6 @@ import qualified Network.Lastfm.JSON.Track as Track
 
 import Loh.Types
 
-toLFMStatus ∷ Either α β → LFMOperationStatus
-toLFMStatus =
-  either (const OperationFailed) (const OperationDone)
 
 loveTrack ∷ LFMConfig → TrackInfo → IO LFMOperationStatus
 loveTrack (ak, sk, s) ti =
@@ -51,3 +48,8 @@ scrobbleTrack (ak, sk, s) ti = do
     , Nothing
     , Nothing
     ) ak sk s
+
+
+toLFMStatus ∷ Either α β → LFMOperationStatus
+toLFMStatus =
+  either (const OperationFailed) (const OperationDone)

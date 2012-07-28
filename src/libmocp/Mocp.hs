@@ -52,7 +52,8 @@ getMocpInfo = (>>= getStatus) <$> runErrorT callMocp
 
 callMocp ∷ ErrorT MocpError IO String
 callMocp = do
-  (exitCode, !response, errorMessage) ← liftIO $ readProcessWithExitCode "mocp" ["-i"] ""
+  (exitCode, !response, errorMessage) ← liftIO $
+    readProcessWithExitCode "mocp" ["-i"] ""
   when (exitCode /= ExitSuccess) $ throwError errorMessage
   return response
 

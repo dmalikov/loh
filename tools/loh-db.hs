@@ -38,7 +38,7 @@ dbPush = do
     Just config → do
       db ← getDB
       let recordsNumber = length db
-      statuses ← forM (zip db [1..]) $ \((DBRecord _ ti), recordNumber) → do
+      statuses ← forM (zip db [1..]) $ \(DBRecord _ ti, recordNumber) → do
         status ← scrobbleTrack (lfmConfig config) ti
         let statusString = case status of
               OperationFailed → "failed"
@@ -46,7 +46,7 @@ dbPush = do
         printf "(%d/%d) scrobbled \"%s - %s\", %s\n"
           (recordNumber∷Int) recordsNumber (artist ti) (track ti) statusString
         return status
-      if (not . null . filter (== OperationFailed) $ statuses)
+      if OperationFailed `elem` statuses
         then
           putStrLn "Total: DB pushing is failed"
         else do

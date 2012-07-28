@@ -11,6 +11,15 @@ import Loh.Types
 import qualified Data.Map as M
 import qualified Network.MPD as MPD
 
+
+getMpdInfo ∷ IO (Maybe TrackInfo)
+getMpdInfo = do
+  info ← (liftFstMaybe . eitherToMaybe) <$> getInfo'
+  return $ formatMPDTrackInfo . second MPD.stTime <$> mfilter isPlaying info
+    where getInfo' = MPD.withMPD $ (,) <$> MPD.currentSong <*> MPD.status
+          isPlaying = (== MPD.Playing) . MPD.stState . snd
+
+
 formatMPDTrackInfo ∷ (MPD.Song, (Double, MPD.Seconds)) → TrackInfo
 formatMPDTrackInfo (song, (curTime, totalTime)) = TrackInfo
   { artist = fromMaybe "No Artist" $ getTag MPD.Artist
@@ -20,9 +29,3 @@ formatMPDTrackInfo (song, (curTime, totalTime)) = TrackInfo
   , track = fromMaybe "No Track" $ getTag MPD.Title
   } where getTag τ = MPD.toString . head <$> M.lookup τ (MPD.sgTags song)
 
-getMpdInfo ∷ IO (Maybe TrackInfo)
-getMpdInfo = do
-  info ← (liftFstMaybe . eitherToMaybe) <$> getInfo'
-  return $ formatMPDTrackInfo . second MPD.stTime <$> mfilter isPlaying info
-    where getInfo' = MPD.withMPD $ (,) <$> MPD.currentSong <*> MPD.status
-          isPlaying = (== MPD.Playing) . MPD.stState . snd

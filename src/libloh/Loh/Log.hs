@@ -16,23 +16,6 @@ import Text.Printf
 import Loh.Format
 import Loh.Types
 
-getTime ∷ IO String
-getTime = formatTime defaultTimeLocale timeFormat <$> getCurrentTime
-
-logMessage ∷ String → IO ()
-logMessage s = do
-  time ← getTime
-  printf logMessageFormat time s
-
-logMessageP ∷ Player → String → IO ()
-logMessageP ρ s = do
-  time ← getTime
-  printf logMessagePFormat time (show $ name ρ) s
-
-log_ ∷ String → Player → TrackInfo → IO ()
-log_ formatString ρ τ = do
-  time ← getTime
-  printf formatString time (show $ name ρ) (artist τ) (track τ)
 
 logNowPlaying ∷ Player → TrackInfo → IO ()
 logNowPlaying = log_ logNowPlayingFormat
@@ -48,3 +31,22 @@ logScrobbleFailed = log_ logScrobbleFailedFormat
 
 logDBStore ∷ Player → TrackInfo → IO ()
 logDBStore = log_ logDBStoreFormat
+
+logMessage ∷ String → IO ()
+logMessage s = do
+  time ← getTime
+  printf logMessageFormat time s
+
+logMessageP ∷ Player → String → IO ()
+logMessageP ρ s = do
+  time ← getTime
+  printf logMessagePFormat time (show $ name ρ) s
+
+
+getTime ∷ IO String
+getTime = formatTime defaultTimeLocale timeFormat <$> getCurrentTime
+
+log_ ∷ String → Player → TrackInfo → IO ()
+log_ formatString ρ τ = do
+  time ← getTime
+  printf formatString time (show $ name ρ) (artist τ) (track τ)

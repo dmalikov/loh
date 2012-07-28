@@ -10,9 +10,19 @@ import Loh.LastFM.Method
 import Loh.Log
 import Loh.Types
 
+
+eventer ∷ LConfig → IO ()
+eventer config = do
+  putStrLn $ "Start scrobbling " ++ show (map name ps)
+  mapM_ (void . forkIO . (\ρ → servePlayer c ρ Nothing)) ps
+  forever $ threadDelayS 1
+ where
+  c = lfmConfig config
+  ps = players config
+
+
 threadDelayS ∷ Int → IO ()
-threadDelayS = threadDelay . toSecs
-  where toSecs = (* 1000000)
+threadDelayS = threadDelay . (* 1000000)
 
 fetchDelay ∷ Int
 fetchDelay = 10 {- delay between players info fetching, secs -}
@@ -42,7 +52,7 @@ servePlayer c ρ maybeOldTrack = do
   threadDelayS fetchDelay
   maybeNewTrack ← getInfo ρ
   case maybeNewTrack of
-    Just new | maybeNewTrack == maybeOldTrack → do
+    Just new | maybeNewTrack == maybeOldTrack →
       -- if there is a point of waiting to scrobble
       if 2 * currentSec new >= totalSec new
         then servePlayer c ρ maybeNewTrack
@@ -67,11 +77,3 @@ servePlayer c ρ maybeOldTrack = do
             else
               servePlayer c ρ Nothing
     _ → servePlayer c ρ maybeNewTrack
-
-eventer ∷ LConfig → IO ()
-eventer config = do
-  let c = lfmConfig config
-      ps = players config
-  putStrLn $ "Start scrobbling " ++ (show $ map name ps)
-  mapM_ (void . forkIO . (\ρ → servePlayer c ρ Nothing)) ps
-  forever $ threadDelayS 1
