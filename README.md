@@ -2,11 +2,11 @@
 
 [![Build Status](https://secure.travis-ci.org/dmalikov/loh.png?branch=master)](http://travis-ci.org/dmalikov/loh)
 
-*Loh* is LastFM scrobbler based on [liblastfm](https://github.com/supki/haskell-liblastfm).
-*Loh* is available to scrobble track info from many players in parallel.
+**Loh** is LastFM scrobbler based on [liblastfm](https://github.com/supki/haskell-liblastfm).
+**Loh** is available to scrobble track info from many players in parallel.
 
 ## How to start
-At first, you need to allow access from Loh to your LastFM account. *Loh* suggest to do it at first time.
+At first, you need to allow access from Loh to your LastFM account. **Loh** suggest to do it at first time.
 
     $> loh
     ~/.lohrc seems to be missing
@@ -20,16 +20,16 @@ Then you should configure Loh by adding some player names in `~/.lohrc`.
     loh: There is nothing to scrobble!
     Add some players to your config file.
 
-After that *loh* is ready to use.
+After that **Loh** is ready to use.
 
 ## Loh-db
-Loh-db is an utility to manage tracks that failed scrobbling. For example, you are offline, and Loh said:
+**Loh-db** is an utility to manage tracks that failed scrobbling. For example, you are offline, and Loh said:
 
     2012-06-30 [22:17:10]: [Mpd] now playing "The Legendary Pink Dots - King of a Small World" failed
     2012-06-30 [22:18:40]: [Mpd] scrobbling "The Legendary Pink Dots - King of a Small World" failed 
     2012-06-30 [22:18:40]: [Mpd] stored in DB "The Legendary Pink Dots - King of a Small World"
 
-Loh store unscrobbled track:
+**Loh** store unscrobbled track:
 
     $> loh-db list
     1 tracks stored:
