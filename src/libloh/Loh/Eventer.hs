@@ -12,13 +12,19 @@ import Loh.Types
 
 
 eventer ∷ LConfig → IO ()
-eventer config = do
-  putStrLn $ "Start scrobbling " ++ show (map name ps)
-  mapM_ (void . forkIO . (\ρ → servePlayer c ρ Nothing)) ps
-  forever $ threadDelayS 1
- where
-  c = lfmConfig config
-  ps = players config
+eventer config =
+  if null players'
+    then error $ unlines
+           [ "There is nothing to scrobble!"
+           , "Add some players to your config file."
+           ]
+    else do
+      putStrLn $ "Start scrobbling " ++ show (map name players')
+      mapM_ (void . forkIO . (\ρ → servePlayer c ρ Nothing)) players'
+      forever $ threadDelayS 1
+  where
+    c = lfmConfig config
+    players' = players config
 
 
 threadDelayS ∷ Int → IO ()
