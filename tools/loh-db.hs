@@ -33,23 +33,26 @@ dbList = do
 
 dbPush ∷ IO ()
 dbPush = do
-  config ← readConfig
-  db ← getDB
-  let recordsNumber = length db
-  statuses ← forM (zip db [1..]) $ \((DBRecord _ ti), recordNumber) → do
-    status ← scrobbleTrack (lfmConfig config) ti
-    let statusString = case status of
-          OperationFailed → "failed"
-          OperationDone → "done"
-    printf "(%d/%d) scrobbled \"%s - %s\", %s\n"
-      (recordNumber∷Int) recordsNumber (artist ti) (track ti) statusString
-    return status
-  if (not . null . filter (== OperationFailed) $ statuses)
-    then
-      putStrLn "Total: DB pushing is failed"
-    else do
-      putStrLn "Total: DB pushing is done"
-      clear
+  decodedConfig ← readConfig
+  case decodedConfig of
+    Just config → do
+      db ← getDB
+      let recordsNumber = length db
+      statuses ← forM (zip db [1..]) $ \((DBRecord _ ti), recordNumber) → do
+        status ← scrobbleTrack (lfmConfig config) ti
+        let statusString = case status of
+              OperationFailed → "failed"
+              OperationDone → "done"
+        printf "(%d/%d) scrobbled \"%s - %s\", %s\n"
+          (recordNumber∷Int) recordsNumber (artist ti) (track ti) statusString
+        return status
+      if (not . null . filter (== OperationFailed) $ statuses)
+        then
+          putStrLn "Total: DB pushing is failed"
+        else do
+          putStrLn "Total: DB pushing is done"
+          clear
+    Nothing → error "Malformed ~/.lohrc."
 
 dbClear ∷ IO ()
 dbClear = do

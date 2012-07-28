@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Loh.Config
   ( LConfig(..)
@@ -49,14 +50,12 @@ instance ToJSON LConfig where
     object ["players" .= map (show . name) ps, "APIKey" .= ak, "SessionKey" .= sk, "Secret" .= s]
 
 
-readConfig ∷ IO LConfig
+readConfig ∷ IO (Maybe LConfig)
 readConfig =
   do hd ← getHomeDirectory
      withFile (hd </> configFileName) ReadMode $ \h →
-       do contents ← B.hGetContents h
-          case decode contents of
-            Just config → return config
-            Nothing → fail "Malformed configuration file"
+       do !contents ← B.hGetContents h
+          return $ decode contents
 
 
 writeConfig ∷ LConfig → IO ()
