@@ -65,8 +65,8 @@ servePlayer c ρ maybeOldTrack = do
         else do
           stnp ← nowPlaying c new
           case stnp of
-            OperationDone → logNowPlaying ρ new
-            OperationFailed → logNowPlayingFailed ρ new
+            Right _ → logNowPlaying ρ new
+            Left _ → logNowPlayingFailed ρ new
           let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
           -- logMessageP ρ $ "waiting " ++ show delayToScrobble ++ " toScrobble"
           isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
@@ -74,8 +74,8 @@ servePlayer c ρ maybeOldTrack = do
             then do
               st ← scrobbleTrack c new
               case st of
-                OperationDone → logScrobble ρ new
-                OperationFailed → do
+                Right _ → logScrobble ρ new
+                Left _ → do
                   logScrobbleFailed ρ new
                   logDBStore ρ new
                   store new

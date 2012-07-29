@@ -2,6 +2,7 @@ module Main where
 
 import Control.Applicative ((<$>))
 import Control.Monad (forM_, forM)
+import Data.Either (lefts)
 import Data.List (intercalate)
 import Data.Time (formatTime)
 import System.Environment (getArgs)
@@ -41,17 +42,17 @@ dbPush = do
       statuses ← forM (zip db [1..]) $ \(DBRecord _ ti, recordNumber) → do
         status ← scrobbleTrack (lfmConfig config) ti
         let statusString = case status of
-              OperationFailed → "failed"
-              OperationDone → "done"
+              Right _ → "done"
+              Left _ → "failed"
         printf "(%d/%d) scrobbled \"%s - %s\", %s\n"
           (recordNumber∷Int) recordsNumber (artist ti) (track ti) statusString
         return status
-      if OperationFailed `elem` statuses
-        then
-          putStrLn "Total: DB pushing is failed"
-        else do
+      if null $ lefts statuses
+        then do
           putStrLn "Total: DB pushing is done"
           clear
+        else
+          putStrLn "Total: DB pushing is failed"
     Nothing → error "Malformed ~/.lohrc."
 
 dbClear ∷ IO ()
