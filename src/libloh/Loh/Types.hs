@@ -39,6 +39,3 @@ data PlayerName = Mocp | Mpd
   deriving (Eq, Ord, Read, Show)
 
 type LFMConfig = (LFM.APIKey, LFM.SessionKey, LFM.Secret)
-
-data LFMOperationStatus = OperationDone | OperationFailed
-  deriving (Eq)

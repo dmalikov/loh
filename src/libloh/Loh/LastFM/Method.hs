@@ -6,22 +6,23 @@ import Control.Applicative ((<$>))
 import Data.Time (formatTime, getCurrentTime)
 import System.Locale (defaultTimeLocale)
 
+import Network.Lastfm (Lastfm, Response)
 import qualified Network.Lastfm as LFM
 import qualified Network.Lastfm.JSON.Track as Track
 
 import Loh.Types
 
 
-loveTrack ∷ LFMConfig → TrackInfo → IO LFMOperationStatus
+loveTrack ∷ LFMConfig → TrackInfo → Lastfm Response
 loveTrack (ak, sk, s) ti =
-  toLFMStatus <$> Track.love
+  Track.love
     (LFM.Artist $ artist ti)
     (LFM.Track $ track ti)
     ak sk s
 
-nowPlaying ∷ LFMConfig → TrackInfo → IO LFMOperationStatus
+nowPlaying ∷ LFMConfig → TrackInfo →  Lastfm Response
 nowPlaying (ak, sk, s) ti =
-  toLFMStatus <$> Track.updateNowPlaying
+  Track.updateNowPlaying
     (LFM.Artist $ artist ti)
     (LFM.Track $ track ti)
     (Just $ LFM.Album $ album ti)
@@ -32,10 +33,10 @@ nowPlaying (ak, sk, s) ti =
     (Just $ LFM.Duration $ totalSec ti)
     ak sk s
 
-scrobbleTrack ∷ LFMConfig → TrackInfo → IO LFMOperationStatus
+scrobbleTrack ∷ LFMConfig → TrackInfo → Lastfm Response
 scrobbleTrack (ak, sk, s) ti = do
   nts ← read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
-  toLFMStatus <$> Track.scrobble
+  Track.scrobble
     ( LFM.Timestamp nts
     , Just $ LFM.Album $ album ti
     , LFM.Artist $ artist ti
@@ -48,8 +49,3 @@ scrobbleTrack (ak, sk, s) ti = do
     , Nothing
     , Nothing
     ) ak sk s
-
-
-toLFMStatus ∷ Either α β → LFMOperationStatus
-toLFMStatus =
-  either (const OperationFailed) (const OperationDone)
