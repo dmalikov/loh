@@ -23,6 +23,7 @@ Library
                         libmpd >= 0.8 && < 0.9,
                         liblastfm >= 0.0.3.3 && < 0.0.4,
                         mtl,
+                        network,
                         old-locale,
                         process,
                         split,
@@ -45,6 +46,7 @@ Library
                         Loh.Players.Kludges,
                         Loh.Players.Mocp,
                         Loh.Players.Mpd,
+                        Loh.Scrobbler,
                         Loh.Types,
                         Mocp
 

@@ -1,13 +1,15 @@
 module Loh.Eventer (eventer) where
 
 import Control.Concurrent (forkIO, threadDelay)
-import Control.Monad (forever, void)
+import Control.Monad (forever, forM_, void)
 import Data.Function (on)
+import Network
+import System.IO
 
 import Loh.Config (LConfig(..))
-import Loh.DB
 import Loh.LastFM.Method
 import Loh.Log
+import Loh.Scrobbler
 import Loh.Types
 
 
@@ -19,8 +21,12 @@ eventer config =
            , "Add some players to your config file."
            ]
     else do
+      void . forkIO . scrobbler . lfmConfig $ config
       putStrLn $ "Start scrobbling " ++ show (map name players')
-      mapM_ (void . forkIO . (\ρ → servePlayer c ρ Nothing)) players'
+      forM_ players' $ \ρ → withSocketsDo $ do
+        h <- connectTo "127.0.0.1" (PortNumber 7123)
+        hSetBuffering h LineBuffering
+        void . forkIO $ servePlayer c h ρ Nothing
       forever $ threadDelayS 1
   where
     c = lfmConfig config
@@ -52,8 +58,8 @@ followUntilReadyToScrobble ρ ti timeToFollow
           then followUntilReadyToScrobble ρ newti $ timeToFollow - fetchDelay
           else return False
 
-servePlayer ∷ LFMConfig → Player → Maybe TrackInfo → IO ()
-servePlayer c ρ maybeOldTrack = do
+servePlayer ∷ LFMConfig → Handle → Player → Maybe TrackInfo → IO ()
+servePlayer c h ρ maybeOldTrack = do
   -- logMessageP ρ $ "currect track is " ++ show maybeOldTrack
   threadDelayS fetchDelay
   maybeNewTrack ← getInfo ρ
@@ -61,7 +67,7 @@ servePlayer c ρ maybeOldTrack = do
     Just new | maybeNewTrack == maybeOldTrack →
       -- if there is a point of waiting to scrobble
       if 2 * currentSec new >= totalSec new
-        then servePlayer c ρ maybeNewTrack
+        then servePlayer c h ρ maybeNewTrack
         else do
           stnp ← nowPlaying c new
           case stnp of
@@ -72,14 +78,8 @@ servePlayer c ρ maybeOldTrack = do
           isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
           if isSameTrack
             then do
-              st ← scrobbleTrack c new
-              case st of
-                Right _ → logScrobble ρ new
-                Left _ → do
-                  logScrobbleFailed ρ new
-                  logDBStore ρ new
-                  store new
-              servePlayer c ρ Nothing
+              hPutStrLn h $ show new
+              servePlayer c h ρ Nothing
             else
-              servePlayer c ρ Nothing
-    _ → servePlayer c ρ maybeNewTrack
+              servePlayer c h ρ Nothing
+    _ → servePlayer c h ρ maybeNewTrack
