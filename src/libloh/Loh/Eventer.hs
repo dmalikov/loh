@@ -24,7 +24,7 @@ eventer config =
       void . forkIO . scrobbler . lfmConfig $ config
       putStrLn $ "Start scrobbling " ++ show (map name players')
       forM_ players' $ \ρ → withSocketsDo $ do
-        h <- connectTo "127.0.0.1" (PortNumber 7123)
+        h <- connectTo "127.0.0.1" (PortNumber 9114)
         hSetBuffering h LineBuffering
         void . forkIO $ servePlayer c h ρ Nothing
       forever $ threadDelayS 1
