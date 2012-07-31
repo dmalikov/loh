@@ -6,6 +6,11 @@ import Control.Exception (SomeException, catch)
 import Network.Lastfm (APIKey(..), Secret(..))
 import Network.Lastfm.JSON.Auth
 import Prelude hiding (catch)
+import System.IO (stderr)
+import System.Log.Logger (Priority(DEBUG), updateGlobalLogger, setLevel, setHandlers)
+import System.Log.Handler (setFormatter)
+import System.Log.Handler.Simple (streamHandler)
+import System.Log.Formatter (tfLogFormatter)
 
 import Loh.Config (LConfig(..), readConfig, writeConfig)
 import Loh.Eventer
@@ -15,7 +20,11 @@ main ∷ IO ()
 main = do
   decodedConfig ← catch readConfig $ \(_ ∷ SomeException) → genConfigSkeleton
   case decodedConfig of
-    Just config → eventer config
+    Just config → do
+      handler ← streamHandler stderr DEBUG >>= \lh → return $
+        setFormatter lh (tfLogFormatter "%F %T" "[$time] ($prio) $loggername: $msg")
+      updateGlobalLogger "" (setLevel INFO . setHandlers [handler])
+      eventer config
     Nothing → error "Malformed ~/.lohrc"
 
 

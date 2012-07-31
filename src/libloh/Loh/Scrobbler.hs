@@ -9,12 +9,12 @@ import Control.Concurrent (forkIO)
 import Data.Aeson (decode)
 import Network.Socket
 import System.IO
+import System.Log.Logger (infoM, warningM)
 
 import Data.ByteString.Lazy.Char8 as BS
 
 import Loh.DB
 import Loh.LastFM.Method
-import Loh.Log
 import Loh.Types
 
 
@@ -41,8 +41,9 @@ playerLoop c h = do
     Just τ → do
       st ← scrobbleTrack c τ
       case st of
-        Right _ → logMessage $ "Scrobbled " ++ show τ
+        Right _ →
+          infoM "Loh.Scrobbler" $ "Scrobbled " ++ show τ
         Left  _ → do
-          logMessage $ "Scrobble failed " ++ show τ
+          warningM "Loh.Scrobbler" $ "Scrobble failed " ++ show τ
           store τ
       playerLoop c h

@@ -32,16 +32,15 @@ Library
                         bytestring,
                         vector,
                         text,
-                        unordered-containers
+                        unordered-containers,
+                        hslogger
 
   HS-Source-Dirs:       src/libloh/, src/libmocp/, src/
 
   Exposed-Modules:      Loh.Config,
                         Loh.DB,
                         Loh.Eventer,
-                        Loh.Format,
                         Loh.LastFM.Method,
-                        Loh.Log,
                         Loh.Players,
                         Loh.Players.Kludges,
                         Loh.Players.Mocp,

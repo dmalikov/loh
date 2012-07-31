@@ -6,12 +6,13 @@ import Data.Aeson (encode)
 import Data.Function (on)
 import Network
 import System.IO
+import System.Log.Logger (debugM, infoM, warningM)
+import Text.Printf (printf)
 
 import qualified Data.ByteString.Lazy.Char8 as BS
 
 import Loh.Config (LConfig(..))
 import Loh.LastFM.Method
-import Loh.Log
 import Loh.Scrobbler (scrobbler)
 import Loh.Types
 
@@ -25,7 +26,7 @@ eventer config =
            ]
     else do
       void . forkIO . scrobbler . lfmConfig $ config
-      putStrLn $ "Start scrobbling " ++ show (map name players')
+      infoM "Loh.Eventer" $ "Start scrobbling " ++ show (map name players')
       forM_ players' $ \ρ → withSocketsDo $ do
         h <- connectTo "127.0.0.1" (PortNumber lohPort)
         hSetBuffering h LineBuffering
@@ -50,7 +51,7 @@ followUntilReadyToScrobble ∷ Player → TrackInfo → Int → IO Bool
 followUntilReadyToScrobble ρ ti timeToFollow
   | timeToFollow < 0 = return True
   | otherwise = do
-    -- logMessageP ρ $ "following... " ++ show timeToFollow ++ " to complete"
+    debugM "Loh.Eventer" $ logMessageP ρ ("following... " ++ show timeToFollow ++ " to complete")
     threadDelayS fetchDelay
     trackInfo' ← getInfo ρ
     case trackInfo' of
@@ -73,10 +74,10 @@ servePlayer c h ρ maybeOldTrack = do
         else do
           stnp ← nowPlaying c new
           case stnp of
-            Right _ → logNowPlaying ρ new
-            Left _ → logNowPlayingFailed ρ new
+            Right _ → debugM "Loh.Eventer" $ logNowPlaying new
+            Left _ → warningM "Loh.Eventer" $ logNowPlayingFailed new
           let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
-          -- logMessageP ρ $ "waiting " ++ show delayToScrobble ++ " toScrobble"
+          debugM "Loh.Eventer" $ logMessageP ρ ("waiting " ++ show delayToScrobble ++ " toScrobble")
           isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
           if isSameTrack
             then do
@@ -85,3 +86,12 @@ servePlayer c h ρ maybeOldTrack = do
             else
               servePlayer c h ρ Nothing
     _ → servePlayer c h ρ maybeNewTrack
+ where
+  logNowPlaying = log_ "[%s] now playing \"%s - %s\""
+
+  logNowPlayingFailed = log_ "[%s] now playing \"%s - %s\" failed"
+
+  log_ format τ = printf format (show $ name ρ) (artist τ) (track τ)
+
+logMessageP ∷ Player → String → String
+logMessageP ρ s = printf "[%s] %s" (show $ name ρ) s
