@@ -2,12 +2,11 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 module Loh.Types where
 
-import Control.Applicative ((<*>), (<$>))
+import Control.Applicative ((<*>), (<$>), empty)
 import Data.Aeson
 import Data.Function (on)
 import Data.Time (UTCTime(..))
 
-import qualified Data.ByteString.Char8 as BS
 import qualified Network.Lastfm as LFM
 
 
@@ -51,6 +50,7 @@ instance FromJSON TrackInfo where
     o .: "currentSec" <*>
     o .: "totalSec" <*>
     o .: "track"
+  parseJSON _ = empty
 
 instance ToJSON TrackInfo where
   toJSON τ = object
@@ -60,3 +60,6 @@ instance ToJSON TrackInfo where
     , "totalSec"   .= totalSec τ
     , "track"      .= track τ
     ]
+
+lohPort ∷ Num α ⇒ α
+lohPort = 9114

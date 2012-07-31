@@ -12,7 +12,7 @@ import qualified Data.ByteString.Lazy.Char8 as BS
 import Loh.Config (LConfig(..))
 import Loh.LastFM.Method
 import Loh.Log
-import Loh.Scrobbler
+import Loh.Scrobbler (scrobbler)
 import Loh.Types
 
 
@@ -27,7 +27,7 @@ eventer config =
       void . forkIO . scrobbler . lfmConfig $ config
       putStrLn $ "Start scrobbling " ++ show (map name players')
       forM_ players' $ \ρ → withSocketsDo $ do
-        h <- connectTo "127.0.0.1" (PortNumber 9114)
+        h <- connectTo "127.0.0.1" (PortNumber lohPort)
         hSetBuffering h LineBuffering
         void . forkIO $ servePlayer c h ρ Nothing
       forever $ threadDelayS 1

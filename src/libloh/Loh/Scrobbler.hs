@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Loh.Scrobbler where
+module Loh.Scrobbler
+  ( scrobbler
+  ) where
 
 import Control.Applicative ((<$>))
 import Control.Monad (forever, void)
@@ -14,6 +16,15 @@ import Loh.DB
 import Loh.LastFM.Method
 import Loh.Log
 import Loh.Types
+
+
+scrobbler ∷ LFMConfig → IO ()
+scrobbler c = withSocketsDo $ do
+  sock ← socket AF_INET Stream 0
+  setSocketOption sock ReuseAddr 1
+  bindSocket sock (SockAddrInet lohPort iNADDR_ANY)
+  listen sock 1024
+  forever $ serve c sock
 
 serve ∷ LFMConfig → Socket → IO ()
 serve c sock = do
@@ -35,11 +46,3 @@ playerLoop c h = do
           logMessage $ "Scrobble failed " ++ show τ
           store τ
       playerLoop c h
-
-scrobbler ∷ LFMConfig → IO ()
-scrobbler c = withSocketsDo $ do
-  sock ← socket AF_INET Stream 0
-  setSocketOption sock ReuseAddr 1
-  bindSocket sock (SockAddrInet 9114 iNADDR_ANY)
-  listen sock 1024
-  forever $ serve c sock
