@@ -17,8 +17,8 @@ import Loh.Types
 
 serve ∷ LFMConfig → Socket → IO ()
 serve c sock = do
-  (s, _) <- accept sock
-  h <- socketToHandle s ReadWriteMode
+  (s, _) ← accept sock
+  h ← socketToHandle s ReadWriteMode
   hSetBuffering h LineBuffering
   void $ forkIO $ playerLoop c h
 
@@ -26,7 +26,7 @@ playerLoop :: LFMConfig → Handle -> IO ()
 playerLoop c h = do
   maybeTrack ← decode <$> BS.hGetContents h
   case maybeTrack of
-    Nothing → return ()
+    Nothing → playerLoop c h
     Just τ → do
       st ← scrobbleTrack c τ
       case st of
@@ -38,7 +38,7 @@ playerLoop c h = do
 
 scrobbler ∷ LFMConfig → IO ()
 scrobbler c = withSocketsDo $ do
-  sock <- socket AF_INET Stream 0
+  sock ← socket AF_INET Stream 0
   setSocketOption sock ReuseAddr 1
   bindSocket sock (SockAddrInet 9114 iNADDR_ANY)
   listen sock 1024
