@@ -1,10 +1,14 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Loh.Scrobbler where
 
 import Control.Applicative ((<$>))
 import Control.Monad (forever, void)
 import Control.Concurrent (forkIO)
+import Data.Aeson (decode)
 import Network.Socket
 import System.IO
+
+import Data.ByteString.Lazy.Char8 as BS
 
 import Loh.DB
 import Loh.LastFM.Method
@@ -20,14 +24,17 @@ serve c sock = do
 
 playerLoop :: LFMConfig → Handle -> IO ()
 playerLoop c h = do
-  τ ← read <$> hGetLine h
-  st ← scrobbleTrack c τ
-  case st of
-    Right _ → logMessage $ "Scrobbled " ++ show τ
-    Left  _ → do
-      logMessage $ "Scrobble failed " ++ show τ
-      store τ
-  playerLoop c h
+  maybeTrack ← decode <$> BS.hGetContents h
+  case maybeTrack of
+    Nothing → return ()
+    Just τ → do
+      st ← scrobbleTrack c τ
+      case st of
+        Right _ → logMessage $ "Scrobbled " ++ show τ
+        Left  _ → do
+          logMessage $ "Scrobble failed " ++ show τ
+          store τ
+      playerLoop c h
 
 scrobbler ∷ LFMConfig → IO ()
 scrobbler c = withSocketsDo $ do

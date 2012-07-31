@@ -2,9 +2,12 @@ module Loh.Eventer (eventer) where
 
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Monad (forever, forM_, void)
+import Data.Aeson (encode)
 import Data.Function (on)
 import Network
 import System.IO
+
+import qualified Data.ByteString.Lazy.Char8 as BS
 
 import Loh.Config (LConfig(..))
 import Loh.LastFM.Method
@@ -60,7 +63,6 @@ followUntilReadyToScrobble ρ ti timeToFollow
 
 servePlayer ∷ LFMConfig → Handle → Player → Maybe TrackInfo → IO ()
 servePlayer c h ρ maybeOldTrack = do
-  -- logMessageP ρ $ "currect track is " ++ show maybeOldTrack
   threadDelayS fetchDelay
   maybeNewTrack ← getInfo ρ
   case maybeNewTrack of
@@ -78,7 +80,7 @@ servePlayer c h ρ maybeOldTrack = do
           isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
           if isSameTrack
             then do
-              hPutStrLn h $ show new
+              BS.hPut h $ encode new
               servePlayer c h ρ Nothing
             else
               servePlayer c h ρ Nothing
