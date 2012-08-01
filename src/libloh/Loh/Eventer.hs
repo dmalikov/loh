@@ -51,7 +51,7 @@ followUntilReadyToScrobble ∷ Player → TrackInfo → Int → IO Bool
 followUntilReadyToScrobble ρ ti timeToFollow
   | timeToFollow < 0 = return True
   | otherwise = do
-    debugM "Loh.Eventer" $ logMessageP ρ ("following... " ++ show timeToFollow ++ " to complete")
+    debugM "Loh.Eventer" $ logMessageP ρ ("following... " ++ show timeToFollow ++ " secs to scrobble")
     threadDelayS fetchDelay
     trackInfo' ← getInfo ρ
     case trackInfo' of
@@ -77,7 +77,7 @@ servePlayer c h ρ maybeOldTrack = do
             Right _ → debugM "Loh.Eventer" $ logNowPlaying new
             Left _ → warningM "Loh.Eventer" $ logNowPlayingFailed new
           let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
-          debugM "Loh.Eventer" $ logMessageP ρ ("waiting " ++ show delayToScrobble ++ " toScrobble")
+          debugM "Loh.Eventer" $ logMessageP ρ ("start waiting " ++ show delayToScrobble ++ " secs to scrobble")
           isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
           if isSameTrack
             then do
@@ -94,4 +94,4 @@ servePlayer c h ρ maybeOldTrack = do
   log_ format τ = printf format (show $ name ρ) (artist τ) (track τ)
 
 logMessageP ∷ Player → String → String
-logMessageP ρ s = printf "[%s] %s" (show $ name ρ) s
+logMessageP ρ = printf "[%s] %s" (show $ name ρ)

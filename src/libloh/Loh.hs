@@ -7,7 +7,7 @@ import Network.Lastfm (APIKey(..), Secret(..))
 import Network.Lastfm.JSON.Auth
 import Prelude hiding (catch)
 import System.IO (stderr)
-import System.Log.Logger (Priority(DEBUG), updateGlobalLogger, setLevel, setHandlers)
+import System.Log.Logger (Priority(DEBUG, INFO), updateGlobalLogger, setLevel, setHandlers)
 import System.Log.Handler (setFormatter)
 import System.Log.Handler.Simple (streamHandler)
 import System.Log.Formatter (tfLogFormatter)
