@@ -15,6 +15,10 @@ Build-type:             Simple
 Cabal-version:          >= 1.6
 Homepage:               https://github.com/dmalikov/loh
 
+flag debug
+  description: Enable DEBUG logging.
+  default: False
+
 Library
   Build-Depends:        base >= 3 && < 5,
                         containers,
@@ -64,3 +68,5 @@ Executable              loh
   Main-is:              Loh.hs
   HS-Source-Dirs:       src/libloh/, src/libmocp/
   Extensions:           UnicodeSyntax
+  if flag(debug)
+    CPP-Options: -D__DEBUG__

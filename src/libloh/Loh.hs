@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
@@ -16,6 +17,14 @@ import Loh.Config (LConfig(..), readConfig, writeConfig)
 import Loh.Eventer
 
 
+debugLevel ∷ Priority
+#ifdef __DEBUG__
+debugLevel = DEBUG
+#else
+debugLevel = INFO
+#endif
+
+
 main ∷ IO ()
 main = do
   decodedConfig ← catch readConfig $ \(_ ∷ SomeException) → genConfigSkeleton
@@ -23,7 +32,7 @@ main = do
     Just config → do
       handler ← streamHandler stderr DEBUG >>= \lh → return $
         setFormatter lh (tfLogFormatter "%F %T" "[$time] ($prio) $loggername: $msg")
-      updateGlobalLogger "" (setLevel INFO . setHandlers [handler])
+      updateGlobalLogger "" (setLevel debugLevel . setHandlers [handler])
       eventer config
     Nothing → error "Malformed ~/.lohrc"
 
