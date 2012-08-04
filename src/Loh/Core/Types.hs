@@ -119,7 +119,6 @@ instance ToJSON Task
 data Packet = Packet
   { taskP       ∷ Task
   , lfmConfigP  ∷ LFMConfig
-  , playerNameP ∷ PlayerName
   , trackInfoP  ∷ TrackInfo
   } deriving Show
 
@@ -127,7 +126,6 @@ instance FromJSON Packet where
   parseJSON (Object o) = Packet <$>
     o .: "task" <*>
     o .: "lfmConfig" <*>
-    o .: "playerName" <*>
     o .: "trackInfo"
   parseJSON _ = empty
 
@@ -135,7 +133,6 @@ instance ToJSON Packet where
   toJSON τ = object
     [ "task"       .= taskP τ
     , "lfmConfig"  .= lfmConfigP τ
-    , "playerName" .= playerNameP τ
     , "trackInfo"  .= trackInfoP τ
     ]
 
