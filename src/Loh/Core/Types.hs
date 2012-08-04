@@ -70,21 +70,21 @@ instance ToJSON PlayerName
 type LFMConfig = (LFM.APIKey, LFM.SessionKey, LFM.Secret)
 
 instance FromJSON LFM.APIKey where
-  parseJSON (Object o) = o .: "apiKey"
+  parseJSON (Object o) = LFM.APIKey <$> o .: "apiKey"
   parseJSON _ = empty
 
 instance ToJSON LFM.APIKey where
-  toJSON ak = object [ "apiKey" .= ak ]
+  toJSON (LFM.APIKey ak) = object [ "apiKey" .= ak ]
 
 instance ToJSON LFM.SessionKey where
-  toJSON sk = object [ "sessionKey" .= sk ]
+  toJSON (LFM.SessionKey sk) = object $ [ "session" .= ( object [ "key" .= sk ] ) ]
 
 instance FromJSON LFM.Secret where
-  parseJSON (Object o) = o .: "secret"
+  parseJSON (Object o) = LFM.Secret <$> o .: "secret"
   parseJSON _ = empty
 
 instance ToJSON LFM.Secret where
-  toJSON s = object [ "secret" .= s ]
+  toJSON (LFM.Secret s) = object [ "secret" .= s ]
 
 instance FromJSON LFMConfig where
   parseJSON (Object o) = do
@@ -111,7 +111,7 @@ lohPort = 9114
 -- Packet
 
 data Task = Scrobble | UpdateNowPlaying
-  deriving Generic
+  deriving (Generic, Show)
 
 instance FromJSON Task
 instance ToJSON Task
@@ -121,7 +121,7 @@ data Packet = Packet
   , lfmConfigP  ∷ LFMConfig
   , playerNameP ∷ PlayerName
   , trackInfoP  ∷ TrackInfo
-  }
+  } deriving Show
 
 instance FromJSON Packet where
   parseJSON (Object o) = Packet <$>

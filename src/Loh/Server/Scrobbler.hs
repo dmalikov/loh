@@ -41,7 +41,7 @@ serve sock = do
   (s, _) ← accept sock
   h ← socketToHandle s ReadWriteMode
   hSetBuffering h LineBuffering
-  void $ forkIO $ playerLoop h
+  playerLoop h
 
 playerLoop :: Handle -> IO ()
 playerLoop h = do
@@ -64,9 +64,9 @@ playerLoop h = do
             Left _ → warningM "Scrobbler" $ logNowPlayingFailed ρ
       playerLoop h
   where
-    logNowPlaying = log_ "[%s] now playing \"%s - %s\""
+    logNowPlaying = log_ "now playing \"%s - %s\""
 
-    logNowPlayingFailed = log_ "[%s] now playing \"%s - %s\" failed"
+    logNowPlayingFailed = log_ "now playing \"%s - %s\" failed"
 
-    log_ format ρ = printf format (show $ playerNameP ρ) (artist τ) (track τ)
+    log_ format ρ = printf format (artist τ) (track τ)
       where τ = trackInfoP ρ

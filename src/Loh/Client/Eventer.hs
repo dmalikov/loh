@@ -24,7 +24,7 @@ eventer config =
            , "Add some players to your config file."
            ]
     else do
-      infoM "Loh.Eventer" $ "Start watching " ++ show (map name players')
+      infoM "Eventer" $ "Start watching " ++ show (map name players')
       forM_ players' $ \ρ → withSocketsDo $ do
         h <- connectTo (serverHost config) (PortNumber lohPort)
         hSetBuffering h LineBuffering
