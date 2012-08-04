@@ -13,8 +13,8 @@ import System.Log.Handler (setFormatter)
 import System.Log.Handler.Simple (streamHandler)
 import System.Log.Formatter (tfLogFormatter)
 
-import Loh.Config (LConfig(..), readConfig, writeConfig)
-import Loh.Eventer
+import Loh.Client.Config (LConfig(..), readConfig, writeConfig)
+import Loh.Client.Eventer
 
 
 debugLevel ∷ Priority
@@ -51,6 +51,7 @@ genConfigSkeleton = do
   writeConfig LConfig
     { players = []
     , lfmConfig = (apiKey, sk, secret)
+    , serverHost = "127.0.0.1"
     }
   putStrLn $ unlines
     [ "Session key is successfuly written to ~/.lohrc"

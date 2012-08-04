@@ -37,20 +37,17 @@ Library
                         vector,
                         text,
                         unordered-containers,
-                        hslogger
+                        hslogger,
+                        ghc-prim
 
-  HS-Source-Dirs:       src/libloh/, src/libmocp/, src/
+  HS-Source-Dirs:       src/, src/libmocp/
 
-  Exposed-Modules:      Loh.Config,
-                        Loh.DB,
-                        Loh.Eventer,
-                        Loh.LastFM.Method,
-                        Loh.Players,
-                        Loh.Players.Kludges,
-                        Loh.Players.Mocp,
-                        Loh.Players.Mpd,
-                        Loh.Scrobbler,
-                        Loh.Types,
+  Exposed-Modules:      Loh.Core.LastFM.Method,
+                        Loh.Core.Players,
+                        Loh.Core.Players.Kludges,
+                        Loh.Core.Players.Mocp,
+                        Loh.Core.Players.Mpd,
+                        Loh.Core.Types,
                         Mocp
 
   Extensions:           UnicodeSyntax
@@ -58,15 +55,14 @@ Library
   GHC-Options:          -Wall
 
 
-Executable              loh-db
-  Main-is:              loh-db.hs
-  HS-Source-Dirs:       tools/, src/libloh/, src/libmocp/
-  Extensions:           UnicodeSyntax
-
-
 Executable              loh
-  Main-is:              Loh.hs
-  HS-Source-Dirs:       src/libloh/, src/libmocp/
+  Main-is:              Client.hs
+  HS-Source-Dirs:       src/, src/Loh/Client/, src/libmocp/
   Extensions:           UnicodeSyntax
   if flag(debug)
     CPP-Options: -D__DEBUG__
+
+Executable              lohd
+  Main-is:              Scrobbler.hs
+  HS-Source-Dirs:       src/, src/Loh/Server/
+  Extensions:           UnicodeSyntax

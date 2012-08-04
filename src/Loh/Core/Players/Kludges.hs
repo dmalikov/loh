@@ -1,4 +1,4 @@
-module Loh.Players.Kludges where
+module Loh.Core.Players.Kludges where
 
 eitherToMaybe ∷ Either α β → Maybe β
 eitherToMaybe = either (const Nothing) Just

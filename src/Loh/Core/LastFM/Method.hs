@@ -1,16 +1,16 @@
-module Loh.LastFM.Method
+module Loh.Core.LastFM.Method
   ( loveTrack, nowPlaying, scrobbleTrack
   ) where
 
 import Control.Applicative ((<$>))
 import Data.Time (formatTime, getCurrentTime)
+import Network.Lastfm (Lastfm, Response)
 import System.Locale (defaultTimeLocale)
 
-import Network.Lastfm (Lastfm, Response)
 import qualified Network.Lastfm as LFM
 import qualified Network.Lastfm.JSON.Track as Track
 
-import Loh.Types
+import Loh.Core.Types
 
 
 loveTrack ∷ LFMConfig → TrackInfo → Lastfm Response

@@ -1,6 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Loh.Config
+module Loh.Client.Config
   ( LConfig(..)
   , readConfig, writeConfig
   ) where
@@ -22,13 +22,14 @@ import qualified Data.ByteString.Lazy as B
 import qualified Data.HashMap.Strict as H (toList)
 import qualified Data.Vector as V (toList)
 
-import Loh.Players
-import Loh.Types
+import Loh.Core.Players
+import Loh.Core.Types
 
 
 data LConfig = LConfig
   { players ∷ [Player]
   , lfmConfig ∷ LFMConfig
+  , serverHost ∷ String
   }
 
 instance FromJSON LConfig where
@@ -37,18 +38,21 @@ instance FromJSON LConfig where
     apiKey ← o .: "APIKey"
     sessionKey ← o .: "SessionKey"
     secret ← o .: "Secret"
+    serverHost' ← o .: "ServerHost"
     return LConfig
       { players = players'
       , lfmConfig = (APIKey apiKey, SessionKey sessionKey, Secret secret)
+      , serverHost = serverHost'
       }
   parseJSON _ = empty
 
 instance ToJSON LConfig where
-  toJSON (LConfig ps (APIKey ak, SessionKey sk, Secret s)) =
+  toJSON (LConfig ps (APIKey ak, SessionKey sk, Secret s) sh) =
     object [ "players" .= map (show . name) ps
            , "APIKey" .= ak
            , "SessionKey" .= sk
            , "Secret" .= s
+           , "ServerHost" .= sh
            ]
 
 

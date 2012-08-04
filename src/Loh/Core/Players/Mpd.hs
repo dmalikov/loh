@@ -1,12 +1,12 @@
-module Loh.Players.Mpd (getMpdInfo) where
+module Loh.Core.Players.Mpd (getMpdInfo) where
 
 import Control.Arrow (second)
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad (mfilter)
 import Data.Maybe (fromMaybe)
 
-import Loh.Players.Kludges
-import Loh.Types
+import Loh.Core.Players.Kludges
+import Loh.Core.Types
 
 import qualified Data.Map as M
 import qualified Network.MPD as MPD

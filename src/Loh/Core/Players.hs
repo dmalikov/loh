@@ -1,10 +1,10 @@
-module Loh.Players
+module Loh.Core.Players
   ( fromName
   ) where
 
-import Loh.Players.Mocp
-import Loh.Players.Mpd
-import Loh.Types
+import Loh.Core.Players.Mocp
+import Loh.Core.Players.Mpd
+import Loh.Core.Types
 
 
 fromName ∷ PlayerName → Player
