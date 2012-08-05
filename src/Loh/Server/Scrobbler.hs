@@ -3,8 +3,10 @@ module Main where
 
 import Control.Applicative ((<$>))
 import Control.Concurrent (forkIO, threadDelay)
+import Control.Exception (handle, SomeException)
 import Control.Monad (forever, void)
 import Data.Aeson (decode)
+import Data.Maybe (maybe)
 import Network.Socket
 import System.IO
 import System.Log.Logger
@@ -41,32 +43,30 @@ serve sock = do
   (s, _) ← accept sock
   h ← socketToHandle s ReadWriteMode
   hSetBuffering h LineBuffering
-  playerLoop h
+  void $ forkIO $ playerLoop h
 
 playerLoop :: Handle -> IO ()
 playerLoop h = do
-  maybePacket ← decode <$> BS.hGetContents h
-  case maybePacket of
-    Nothing → playerLoop h
-    Just ρ → do
-      case taskP ρ of
-        Scrobble → do
-          st ← scrobbleTrack (lfmConfigP ρ) (trackInfoP ρ)
-          case st of
-            Right _ →
-              infoM "Scrobbler" $ "Scrobbled " ++ show (trackInfoP ρ)
-            Left  _ → do
-              warningM "Scrobbler" $ "Scrobble failed " ++ show (trackInfoP ρ)
-        UpdateNowPlaying → do
-          st ← nowPlaying (lfmConfigP ρ) (trackInfoP ρ)
-          case st of
-            Right _ → debugM "Scrobbler" $ logNowPlaying ρ
-            Left _ → warningM "Scrobbler" $ logNowPlayingFailed ρ
-      playerLoop h
+  maybe (return ()) doTask =<< decode <$> BS.hGetContents h
+  playerLoop h
+
+doTask ∷ Packet → IO ()
+doTask ρ = do
+  st ← toCommand ρ (lfmConfigP ρ) (trackInfoP ρ)
+  case st of
+    Right _ → infoM "Scrobbler" $ okMessage ρ
+    Left _ → warningM "Scrobbler" $ failMessage ρ
   where
-    logNowPlaying = log_ "now playing \"%s - %s\""
+    toCommand p = case taskP p of
+                    Scrobble → scrobbleTrack
+                    UpdateNowPlaying → nowPlaying
 
-    logNowPlayingFailed = log_ "now playing \"%s - %s\" failed"
+    okMessage ∷ Packet → String
+    okMessage p = printf "%s \"%s - %s\"" taskName (artist τ) (track τ)
+      where taskName ∷ String
+            taskName = case taskP p of
+                         Scrobble → "scrobble"
+                         UpdateNowPlaying → "now playing"
+            τ = trackInfoP p
+    failMessage p = okMessage p ++ " failed"
 
-    log_ format ρ = printf format (artist τ) (track τ)
-      where τ = trackInfoP ρ

@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeSynonymInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Loh.Core.Types where
 
 import Control.Applicative ((<*>), (<$>), empty)
@@ -59,10 +60,7 @@ data Player = Player
   }
 
 data PlayerName = Mocp | Mpd
-  deriving (Eq, Generic, Ord, Read, Show)
-
-instance FromJSON PlayerName
-instance ToJSON PlayerName
+  deriving (Eq, Ord, Read, Show)
 
 
 -- Config
@@ -77,7 +75,7 @@ instance ToJSON LFM.APIKey where
   toJSON (LFM.APIKey ak) = object [ "apiKey" .= ak ]
 
 instance ToJSON LFM.SessionKey where
-  toJSON (LFM.SessionKey sk) = object $ [ "session" .= ( object [ "key" .= sk ] ) ]
+  toJSON (LFM.SessionKey sk) = object [ "session" .= object [ "key" .= sk ] ]
 
 instance FromJSON LFM.Secret where
   parseJSON (Object o) = LFM.Secret <$> o .: "secret"

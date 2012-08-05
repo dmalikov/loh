@@ -74,8 +74,7 @@ servePlayer c h ρ maybeOldTrack = do
           let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
           debugM "Eventer" $ logMessageP ρ ("start waiting " ++ show delayToScrobble ++ " secs to scrobble")
           isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
-          when isSameTrack $ do
-              BS.hPut h $ encode $ Packet Scrobble c new
+          when isSameTrack $ BS.hPut h $ encode $ Packet Scrobble c new
           servePlayer c h ρ Nothing
     _ → servePlayer c h ρ maybeNewTrack
 
