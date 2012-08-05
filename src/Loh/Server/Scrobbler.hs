@@ -5,6 +5,8 @@ import Control.Applicative ((<$>))
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Exception (handle, SomeException)
 import Control.Monad (forever, void)
+import Control.Monad.Loops (dropWhileM)
+import Control.Monad.State
 import Data.Aeson (decode)
 import Data.Maybe (maybe)
 import Network.Socket
@@ -15,7 +17,8 @@ import System.Log.Handler.Simple (streamHandler)
 import System.Log.Formatter (tfLogFormatter)
 import Text.Printf
 
-import Data.ByteString.Lazy.Char8 as BS
+import qualified Data.ByteString.Lazy.Char8 as BS
+import qualified Data.Sequence as S
 
 import Loh.Core.LastFM.Method
 import Loh.Core.Types
@@ -43,30 +46,45 @@ serve sock = do
   (s, _) ← accept sock
   h ← socketToHandle s ReadWriteMode
   hSetBuffering h LineBuffering
-  void $ forkIO $ playerLoop h
+  void $ forkIO $ evalStateT (playerLoop h) []
 
-playerLoop :: Handle -> IO ()
+playerLoop :: Handle → StateT [Task] IO ()
 playerLoop h = do
-  maybe (return ()) doTask =<< decode <$> BS.hGetContents h
+  newTask ← lift $ decode <$> BS.hGetContents h
+  taskDone ← lift $ maybe (return False) doTask newTask
+  unless taskDone $ modify (maybe id (:) newTask)
+  -- handle failed tasks
+  when taskDone $ do
+    tasks ← get
+    newTasks ← lift $ dropWhileM doTask tasks
+    put newTasks
+  tasks ← get
+  lift $ debugM "Scrobbler" $ "failed tasks: " ++ show tasks
   playerLoop h
 
-doTask ∷ Packet → IO ()
-doTask ρ = do
-  st ← toCommand ρ (lfmConfigP ρ) (trackInfoP ρ)
+doTask ∷ Task → IO Bool
+doTask p = do
+  st ← toCommand p (lfmConfigT p) (trackInfoT p)
   case st of
-    Right _ → infoM "Scrobbler" $ okMessage ρ
-    Left _ → warningM "Scrobbler" $ failMessage ρ
+    Right _ → do
+      infoM "Scrobbler" $ okMessage p
+      return True
+    Left _ → do
+      warningM "Scrobbler" $ failMessage p
+      return False
   where
-    toCommand p = case taskP p of
+    toCommand p = case typeT p of
                     Scrobble → scrobbleTrack
                     UpdateNowPlaying → nowPlaying
 
-    okMessage ∷ Packet → String
     okMessage p = printf "%s \"%s - %s\"" taskName (artist τ) (track τ)
-      where taskName ∷ String
-            taskName = case taskP p of
-                         Scrobble → "scrobble"
-                         UpdateNowPlaying → "now playing"
-            τ = trackInfoP p
+
     failMessage p = okMessage p ++ " failed"
+
+    taskName ∷ String
+    taskName = case typeT p of
+                 Scrobble → "scrobble"
+                 UpdateNowPlaying → "now playing"
+
+    τ = trackInfoT p
 

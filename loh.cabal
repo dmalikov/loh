@@ -38,7 +38,8 @@ Library
                         text,
                         unordered-containers,
                         hslogger,
-                        ghc-prim
+                        ghc-prim,
+                        monad-loops
 
   HS-Source-Dirs:       src/, src/libmocp/
 

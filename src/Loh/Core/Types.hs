@@ -106,31 +106,31 @@ lohPort ∷ Num α ⇒ α
 lohPort = 9114
 
 
--- Packet
+-- Task
 
-data Task = Scrobble | UpdateNowPlaying
+data TaskType = Scrobble | UpdateNowPlaying
   deriving (Generic, Show)
 
-instance FromJSON Task
-instance ToJSON Task
+instance FromJSON TaskType
+instance ToJSON TaskType
 
-data Packet = Packet
-  { taskP       ∷ Task
-  , lfmConfigP  ∷ LFMConfig
-  , trackInfoP  ∷ TrackInfo
+data Task = Task
+  { typeT       ∷ TaskType
+  , lfmConfigT  ∷ LFMConfig
+  , trackInfoT  ∷ TrackInfo
   } deriving Show
 
-instance FromJSON Packet where
-  parseJSON (Object o) = Packet <$>
-    o .: "task" <*>
+instance FromJSON Task where
+  parseJSON (Object o) = Task <$>
+    o .: "type" <*>
     o .: "lfmConfig" <*>
     o .: "trackInfo"
   parseJSON _ = empty
 
-instance ToJSON Packet where
+instance ToJSON Task where
   toJSON τ = object
-    [ "task"       .= taskP τ
-    , "lfmConfig"  .= lfmConfigP τ
-    , "trackInfo"  .= trackInfoP τ
+    [ "type"       .= typeT τ
+    , "lfmConfig"  .= lfmConfigT τ
+    , "trackInfo"  .= trackInfoT τ
     ]
 
