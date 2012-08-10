@@ -59,7 +59,8 @@ playerLoop h = do
     newTasks ← lift $ dropWhileM doTask tasks
     put newTasks
   tasks ← get
-  lift $ debugM "Scrobbler" $ "failed tasks: " ++ show tasks
+  when (length tasks > 0) $
+      lift $ debugM "Scrobbler" $ "failed tasks: " ++ (show $ length tasks)
   playerLoop h
 
 doTask ∷ Task → IO Bool

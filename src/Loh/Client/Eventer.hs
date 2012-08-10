@@ -26,7 +26,7 @@ eventer config =
     else do
       infoM "Eventer" $ "Start watching " ++ show (map name players')
       forM_ players' $ \ρ → withSocketsDo $ do
-        h <- connectTo (serverHost config) (PortNumber lohPort)
+        h ← connectTo (serverHost config) (PortNumber lohPort)
         hSetBuffering h LineBuffering
         void . forkIO $ servePlayer c h ρ Nothing
       forever $ threadDelayS 1
