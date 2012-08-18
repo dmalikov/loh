@@ -15,6 +15,7 @@ import System.Log.Formatter (tfLogFormatter)
 
 import Loh.Client.Config (LConfig(..), readConfig, writeConfig)
 import Loh.Client.Eventer
+import Loh.Core.Types
 
 
 debugLevel ∷ Priority
@@ -50,7 +51,7 @@ genConfigSkeleton = do
   sk ← extract <$> getSession apiKey token secret
   writeConfig LConfig
     { players = []
-    , lfmConfig = (apiKey, sk, secret)
+    , lfmConfig = LFMConfig apiKey sk secret
     , serverHost = "127.0.0.1"
     }
   putStrLn $ unlines

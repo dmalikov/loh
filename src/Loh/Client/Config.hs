@@ -41,13 +41,13 @@ instance FromJSON LConfig where
     serverHost' ← o .: "ServerHost"
     return LConfig
       { players = players'
-      , lfmConfig = (APIKey apiKey, SessionKey sessionKey, Secret secret)
+      , lfmConfig = LFMConfig (APIKey apiKey) (SessionKey sessionKey) (Secret secret)
       , serverHost = serverHost'
       }
   parseJSON _ = empty
 
 instance ToJSON LConfig where
-  toJSON (LConfig ps (APIKey ak, SessionKey sk, Secret s) sh) =
+  toJSON (LConfig ps (LFMConfig (APIKey ak) (SessionKey sk) (Secret s)) sh) =
     object [ "players" .= map (show . name) ps
            , "APIKey" .= ak
            , "SessionKey" .= sk

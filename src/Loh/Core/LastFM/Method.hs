@@ -14,14 +14,14 @@ import Loh.Core.Types
 
 
 loveTrack ∷ LFMConfig → TrackInfo → Lastfm Response
-loveTrack (ak, sk, s) ti =
+loveTrack (LFMConfig ak sk s) ti =
   Track.love
     (LFM.Artist $ artist ti)
     (LFM.Track $ track ti)
     ak sk s
 
 nowPlaying ∷ LFMConfig → TrackInfo →  Lastfm Response
-nowPlaying (ak, sk, s) ti =
+nowPlaying (LFMConfig ak sk s) ti =
   Track.updateNowPlaying
     (LFM.Artist $ artist ti)
     (LFM.Track $ track ti)
@@ -34,7 +34,7 @@ nowPlaying (ak, sk, s) ti =
     ak sk s
 
 scrobbleTrack ∷ LFMConfig → TrackInfo → Lastfm Response
-scrobbleTrack (ak, sk, s) ti = do
+scrobbleTrack (LFMConfig ak sk s) ti = do
   nts ← read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
   Track.scrobble
     ( LFM.Timestamp nts
