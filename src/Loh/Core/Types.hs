@@ -83,11 +83,10 @@ instance ToJSON LFM.Secret where
   toJSON (LFM.Secret s) = object [ "secret" .= s ]
 
 instance FromJSON LFMConfig where
-  parseJSON (Object o) = do
-    ak ← o .: "apiKey"
-    sk ← o .: "sessionKey"
-    s  ← o .: "secret"
-    return (LFM.APIKey ak, LFM.SessionKey sk, LFM.Secret s)
+  parseJSON (Object o) = (,,) <$>
+     LFM.APIKey     <$> o .: "apiKey" <*>
+    (LFM.SessionKey <$> o .: "sessionKey") <*>
+    (LFM.Secret     <$> o .: "secret")
   parseJSON _ = empty
 
 instance ToJSON LFMConfig where
@@ -124,11 +123,10 @@ data Task = Task
   } deriving Show
 
 instance FromJSON Task where
-  parseJSON (Object o) = do
-    t  ← read <$> o .: "type"
-    l  ← o .: "lfmConfig"
-    ti ← o .: "trackInfo"
-    return $ Task t l ti
+  parseJSON (Object o) = Task <$>
+    read <$> o .: "type" <*>
+    o .: "lfmConfig" <*>
+    o .: "trackInfo"
   parseJSON _ = empty
 
 instance ToJSON Task where
