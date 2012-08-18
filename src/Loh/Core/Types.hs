@@ -89,11 +89,11 @@ instance FromJSON LFMConfig where
     ak ← o .: "apiKey"
     sk ← o .: "sessionKey"
     s ← o .: "secret"
-    return (ak, sk, s)
+    return (LFM.APIKey ak, LFM.SessionKey sk, LFM.Secret s)
   parseJSON _ = empty
 
 instance ToJSON LFMConfig where
-  toJSON (ak, sk, s) = object
+  toJSON (LFM.APIKey ak, LFM.SessionKey sk, LFM.Secret s) = object
     [ "apiKey"     .= ak
     , "sessionKey" .= sk
     , "secret"     .= s
