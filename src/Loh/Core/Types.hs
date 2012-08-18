@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeSynonymInstances #-}
@@ -8,7 +7,6 @@ module Loh.Core.Types where
 import Control.Applicative ((<*>), (<$>), empty)
 import Data.Aeson
 import Data.Function (on)
-import GHC.Generics
 
 import qualified Network.Lastfm as LFM
 
@@ -88,7 +86,7 @@ instance FromJSON LFMConfig where
   parseJSON (Object o) = do
     ak ← o .: "apiKey"
     sk ← o .: "sessionKey"
-    s ← o .: "secret"
+    s  ← o .: "secret"
     return (LFM.APIKey ak, LFM.SessionKey sk, LFM.Secret s)
   parseJSON _ = empty
 
@@ -109,10 +107,15 @@ lohPort = 9114
 -- Task
 
 data TaskType = Scrobble | UpdateNowPlaying
-  deriving (Generic, Show)
+  deriving (Read, Show)
 
-instance FromJSON TaskType
-instance ToJSON TaskType
+
+instance FromJSON TaskType where
+  parseJSON (Object o) = read <$> o .: "type"
+  parseJSON _ = empty
+
+instance ToJSON TaskType where
+  toJSON t = object [ "type" .= show t ]
 
 data Task = Task
   { typeT       ∷ TaskType
@@ -121,16 +124,16 @@ data Task = Task
   } deriving Show
 
 instance FromJSON Task where
-  parseJSON (Object o) = Task <$>
-    o .: "type" <*>
-    o .: "lfmConfig" <*>
-    o .: "trackInfo"
+  parseJSON (Object o) = do
+    t  ← read <$> o .: "type"
+    l  ← o .: "lfmConfig"
+    ti ← o .: "trackInfo"
+    return $ Task t l ti
   parseJSON _ = empty
 
 instance ToJSON Task where
-  toJSON τ = object
-    [ "type"       .= typeT τ
-    , "lfmConfig"  .= lfmConfigT τ
-    , "trackInfo"  .= trackInfoT τ
+  toJSON (Task t l ti) = object
+    [ "type"       .= show t
+    , "lfmConfig"  .= l
+    , "trackInfo"  .= ti
     ]
-
