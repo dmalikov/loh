@@ -65,8 +65,7 @@ data PlayerName = Mocp | Mpd
 
 -- Config
 
-data LFMConfig = LFMConfig LFM.APIKey LFM.SessionKey LFM.Secret
-  deriving (Generic, Show)
+type LFMConfig = (LFM.APIKey, LFM.SessionKey, LFM.Secret)
 
 instance FromJSON LFM.APIKey where
   parseJSON (Object o) = LFM.APIKey <$> o .: "apiKey"
@@ -86,7 +85,19 @@ instance ToJSON LFM.Secret where
   toJSON (LFM.Secret s) = object [ "secret" .= s ]
 
 instance FromJSON LFMConfig where
+  parseJSON (Object o) = do
+    ak ← o .: "apiKey"
+    sk ← o .: "sessionKey"
+    s ← o .: "secret"
+    return (ak, sk, s)
+  parseJSON _ = empty
+
 instance ToJSON LFMConfig where
+  toJSON (ak, sk, s) = object
+    [ "apiKey"     .= ak
+    , "sessionKey" .= sk
+    , "secret"     .= s
+    ]
 
 
 -- Port (?)
