@@ -19,6 +19,10 @@ flag debug
   description: Enable DEBUG logging.
   default: False
 
+flag without_client
+  description: Compile lohd without a client
+  default: False
+
 Library
   Build-Depends:        base >= 3 && < 5,
                         containers,
@@ -60,8 +64,13 @@ Executable              loh
   Main-is:              Client.hs
   HS-Source-Dirs:       src/, src/Loh/Client/, src/libmocp/
   Extensions:           UnicodeSyntax
+
   if flag(debug)
-    CPP-Options: -D__DEBUG__
+    CPP-Options:        -D__DEBUG__
+
+  if flag(without_client)
+    buildable:          False
+
 
 Executable              lohd
   Main-is:              Scrobbler.hs
