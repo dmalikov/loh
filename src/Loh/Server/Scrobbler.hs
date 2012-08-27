@@ -21,13 +21,14 @@ import qualified Data.ByteString.Lazy.Char8 as BS
 import qualified Data.Sequence as S
 
 import Loh.Core.LastFM.Method
+import Loh.Core.Task
 import Loh.Core.Types
 
 
 main ∷ IO ()
 main = do
   handler ← streamHandler stderr DEBUG >>= \lh → return $
-    setFormatter lh (tfLogFormatter "%F %T" "[$time] ($prio) $loggername: $msg")
+    setFormatter lh $ tfLogFormatter "%F %T" "[$time] ($prio) $loggername: $msg"
   updateGlobalLogger "" (setLevel DEBUG . setHandlers [handler])
   void $ forkIO scrobbler
   forever $ threadDelay 1000000
@@ -60,32 +61,30 @@ playerLoop h = do
     put newTasks
   tasks ← get
   when (length tasks > 0) $
-      lift $ debugM "Scrobbler" $ "failed tasks: " ++ (show $ length tasks)
+      lift $ debugM "Scrobbler" $ "failed tasks: " ++ show ( length tasks)
   playerLoop h
 
 doTask ∷ Task → IO Bool
-doTask p = do
-  st ← toCommand p (lfmConfigT p) (trackInfoT p)
+doTask (Task taskType config taskTrack@(Track al ar s t)) = do
+  st ← toCommand config taskTrack
   case st of
     Right _ → do
-      infoM "Scrobbler" $ okMessage p
+      infoM "Scrobbler" okMessage
       return True
     Left _ → do
-      warningM "Scrobbler" $ failMessage p
+      warningM "Scrobbler" failMessage
       return False
   where
-    toCommand p = case typeT p of
+    toCommand = case taskType of
                     Scrobble → scrobbleTrack
                     UpdateNowPlaying → nowPlaying
 
-    okMessage p = printf "%s \"%s - %s\"" taskName (artist τ) (track τ)
-
-    failMessage p = okMessage p ++ " failed"
+    okMessage, failMessage ∷ String
+    okMessage   = printf "%s \"%s - %s\"" taskName ar t
+    failMessage = okMessage ++ " failed"
 
     taskName ∷ String
-    taskName = case typeT p of
+    taskName = case taskType of
                  Scrobble → "scrobble"
                  UpdateNowPlaying → "now playing"
-
-    τ = trackInfoT p
 

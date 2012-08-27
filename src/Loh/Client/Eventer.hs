@@ -12,7 +12,9 @@ import Text.Printf (printf)
 import qualified Data.ByteString.Lazy.Char8 as BS
 
 import Loh.Client.Config (LConfig(..))
+import Loh.Core.LastFM.Auth
 import Loh.Core.LastFM.Method
+import Loh.Core.Task
 import Loh.Core.Types
 
 
@@ -70,11 +72,11 @@ servePlayer c h ρ maybeOldTrack = do
       if 2 * currentSec new >= totalSec new
         then servePlayer c h ρ maybeNewTrack
         else do
-          BS.hPut h $ encode $ Task UpdateNowPlaying c new
+          BS.hPut h $ encode $ Task UpdateNowPlaying c $ toTrack new
           let delayToScrobble = round . (* 0.51) . toRational $ totalSec new
           debugM "Eventer" $ logMessageP ρ ("start waiting " ++ show delayToScrobble ++ " secs to scrobble")
           isSameTrack ← followUntilReadyToScrobble ρ new delayToScrobble
-          when isSameTrack $ BS.hPut h $ encode $ Task Scrobble c new
+          when isSameTrack $ BS.hPut h $ encode $ Task Scrobble c $ toTrack new
           servePlayer c h ρ Nothing
     _ → servePlayer c h ρ maybeNewTrack
 

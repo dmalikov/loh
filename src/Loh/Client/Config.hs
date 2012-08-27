@@ -22,6 +22,7 @@ import qualified Data.ByteString.Lazy as B
 import qualified Data.HashMap.Strict as H (toList)
 import qualified Data.Vector as V (toList)
 
+import Loh.Core.LastFM.Auth
 import Loh.Core.Players
 import Loh.Core.Types
 

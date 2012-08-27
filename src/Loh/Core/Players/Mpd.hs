@@ -26,6 +26,6 @@ formatMPDTrackInfo (song, (curTime, totalTime)) = TrackInfo
   , album = fromMaybe "No Album" $ getTag MPD.Album
   , currentSec = round curTime
   , totalSec = fromIntegral totalTime
-  , track = fromMaybe "No Track" $ getTag MPD.Title
+  , title = fromMaybe "No Track" $ getTag MPD.Title
   } where getTag τ = MPD.toString . head <$> M.lookup τ (MPD.sgTags song)
 

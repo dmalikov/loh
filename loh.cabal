@@ -47,11 +47,13 @@ Library
 
   HS-Source-Dirs:       src/, src/libmocp/
 
-  Exposed-Modules:      Loh.Core.LastFM.Method,
+  Exposed-Modules:      Loh.Core.LastFM.Auth
+                        Loh.Core.LastFM.Method,
                         Loh.Core.Players,
                         Loh.Core.Players.Kludges,
                         Loh.Core.Players.Mocp,
                         Loh.Core.Players.Mpd,
+                        Loh.Core.Task,
                         Loh.Core.Types,
                         Mocp
 

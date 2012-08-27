@@ -10,39 +10,37 @@ import System.Locale (defaultTimeLocale)
 import qualified Network.Lastfm as LFM
 import qualified Network.Lastfm.JSON.Track as Track
 
-import Loh.Core.Types
+import Loh.Core.LastFM.Auth
+import Loh.Core.Task
 
 
-loveTrack ∷ LFMConfig → TrackInfo → Lastfm Response
-loveTrack (ak, sk, s) ti =
-  Track.love
-    (LFM.Artist $ artist ti)
-    (LFM.Track $ track ti)
-    ak sk s
+loveTrack ∷ LFMConfig → Track → Lastfm Response
+loveTrack (ak, sk, s) (Track _ ar _ t) =
+  Track.love (LFM.Artist ar) (LFM.Track t) ak sk s
 
-nowPlaying ∷ LFMConfig → TrackInfo →  Lastfm Response
-nowPlaying (ak, sk, s) ti =
+nowPlaying ∷ LFMConfig → Track → Lastfm Response
+nowPlaying (ak, sk, s) (Track al ar l t) =
   Track.updateNowPlaying
-    (LFM.Artist $ artist ti)
-    (LFM.Track $ track ti)
-    (Just $ LFM.Album $ album ti)
+    (LFM.Artist ar)
+    (LFM.Track t)
+    (LFM.Album <$> al)
     Nothing
     Nothing
     Nothing
     Nothing
-    (Just $ LFM.Duration $ totalSec ti)
+    (LFM.Duration <$> l)
     ak sk s
 
-scrobbleTrack ∷ LFMConfig → TrackInfo → Lastfm Response
-scrobbleTrack (ak, sk, s) ti = do
+scrobbleTrack ∷ LFMConfig → Track → Lastfm Response
+scrobbleTrack (ak, sk, s) (Track al ar l t) = do
   nts ← read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
   Track.scrobble
     ( LFM.Timestamp nts
-    , Just $ LFM.Album $ album ti
-    , LFM.Artist $ artist ti
-    , LFM.Track $ track ti
+    , LFM.Album <$> al
+    , LFM.Artist ar
+    , LFM.Track t
     , Nothing
-    , Nothing
+    , LFM.Duration <$> l
     , Nothing
     , Nothing
     , Nothing

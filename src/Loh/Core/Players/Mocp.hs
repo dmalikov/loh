@@ -22,6 +22,6 @@ formatMOCTrackInfo s = TrackInfo
   , album = MOC.album $ MOC.metadata s
   , currentSec = MOC.currentSec s
   , totalSec = MOC.totalSec s
-  , track = MOC.track $ MOC.metadata s
+  , title = MOC.track $ MOC.metadata s
   }
 
