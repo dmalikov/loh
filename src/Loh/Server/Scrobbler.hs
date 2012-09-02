@@ -51,7 +51,7 @@ serve sock = do
 
 playerLoop :: Handle → StateT [Task] IO ()
 playerLoop h = do
-  newTask ← lift $ decode <$> BS.hGetContents h
+  newTask  ← lift $ decode <$> BS.hGetContents h
   taskDone ← lift $ maybe (return False) doTask newTask
   unless taskDone $ modify (maybe id (:) newTask)
   -- handle failed tasks
@@ -61,7 +61,7 @@ playerLoop h = do
     put newTasks
   tasks ← get
   when (length tasks > 0) $
-      lift $ debugM "Scrobbler" $ "failed tasks: " ++ show ( length tasks)
+      lift $ debugM "Scrobbler" $ "failed tasks: " ++ show (length tasks)
   playerLoop h
 
 doTask ∷ Task → IO Bool
@@ -76,8 +76,8 @@ doTask (Task taskType config taskTrack@(Track al ar s t)) = do
       return False
   where
     toCommand = case taskType of
-                    Scrobble → scrobbleTrack
-                    UpdateNowPlaying → nowPlaying
+                  Scrobble → scrobbleTrack
+                  UpdateNowPlaying → nowPlaying
 
     okMessage, failMessage ∷ String
     okMessage   = printf "%s \"%s - %s\"" taskName ar t
@@ -87,4 +87,3 @@ doTask (Task taskType config taskTrack@(Track al ar s t)) = do
     taskName = case taskType of
                  Scrobble → "scrobble"
                  UpdateNowPlaying → "now playing"
-
