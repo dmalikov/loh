@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Main where
+module Loh.Server.Scrobbler
+  ( scrobbler
+  ) where
 
 import Control.Applicative ((<$>))
 import Control.Concurrent (forkIO, threadDelay)
@@ -25,15 +27,6 @@ import Loh.Core.Task
 import Loh.Core.Types
 
 
-main ∷ IO ()
-main = do
-  handler ← streamHandler stderr DEBUG >>= \lh → return $
-    setFormatter lh $ tfLogFormatter "%F %T" "[$time] ($prio) $loggername: $msg"
-  updateGlobalLogger "" (setLevel DEBUG . setHandlers [handler])
-  void $ forkIO scrobbler
-  forever $ threadDelay 1000000
-
-
 scrobbler ∷ IO ()
 scrobbler = withSocketsDo $ do
   sock ← socket AF_INET Stream 0
@@ -41,6 +34,7 @@ scrobbler = withSocketsDo $ do
   bindSocket sock (SockAddrInet lohPort iNADDR_ANY)
   listen sock 1024
   forever $ serve sock
+
 
 serve ∷ Socket → IO ()
 serve sock = do

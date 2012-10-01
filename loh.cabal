@@ -75,6 +75,6 @@ Executable              loh
 
 
 Executable              lohd
-  Main-is:              Scrobbler.hs
+  Main-is:              Server.hs
   HS-Source-Dirs:       src/, src/Loh/Server/
   Extensions:           UnicodeSyntax
