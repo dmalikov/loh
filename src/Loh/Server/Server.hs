@@ -7,9 +7,9 @@ import Options.Applicative
 import System.Directory (createDirectory, getHomeDirectory)
 import System.FilePath.Posix ((</>))
 import System.IO (stderr)
-import System.Log.Logger
-import System.Log.Handler (setFormatter)
-import System.Log.Handler.Simple (streamHandler)
+import System.Log.Logger (Logger(..), Priority(..), setHandlers, setLevel, updateGlobalLogger)
+import System.Log.Handler (LogHandler(..), setFormatter)
+import System.Log.Handler.Simple (fileHandler, GenericHandler(..), streamHandler)
 import System.Log.Formatter (tfLogFormatter)
 import System.Posix.Daemonize
 import System.Posix.Files (fileExist, removeLink)
@@ -47,6 +47,17 @@ main = run =<< execParser opts
                 ( briefDesc
                 & progDesc "Loh daemon")
 
+-- stderrHandler ∷ LogHandler α ⇒ IO α
+stderrHandler = do
+  lh ← streamHandler stderr DEBUG
+  return $ setFormatter lh $ tfLogFormatter "%F %T" "[$time] ($prio) $loggername: $msg"
+
+-- logFileHandler ∷ LogHandler α ⇒ IO α
+logFileHandler = do
+  f ← lohdLogFilename
+  lh ← fileHandler f DEBUG
+  return $ setFormatter lh $ tfLogFormatter "%F %T" "[$time] ($prio) $loggername: $msg"
+
 run ∷ Configuration → IO ()
 run (Configuration _ True) = printStatus =<< kill
   where printStatus ∷ Bool → IO ()
@@ -56,16 +67,20 @@ run (Configuration _ True) = printStatus =<< kill
 run (Configuration mode _) = do
   createLohdDir =<< lohdDirNotExist
   case mode of
-    Foreground → process
+    Foreground → do
+      stderrHandler' ← stderrHandler
+      process [stderrHandler']
     Background → pidExist >>= \exist →
         if exist then putStrLn "Warning: lohd is already running!"
-                 else daemonize $ pidWrite >> process
+                 else daemonize $ do
+                   pidWrite
+                   stderrHandler' ← stderrHandler
+                   logFileHandler' ← logFileHandler
+                   process [stderrHandler', logFileHandler']
 
-process ∷ IO ()
-process = do
-  handler ← streamHandler stderr DEBUG >>= \lh → return $
-    setFormatter lh $ tfLogFormatter "%F %T" "[$time] ($prio) $loggername: $msg"
-  updateGlobalLogger "" (setLevel DEBUG . setHandlers [handler])
+-- process ∷ LogHandler α => [α] → IO ()
+process handlers = do
+  updateGlobalLogger "" (System.Log.Logger.setLevel DEBUG . setHandlers handlers)
   void $ forkIO scrobbler
   forever $ threadDelay 1000000
 
@@ -79,10 +94,13 @@ createLohdDir ∷ Bool → IO ()
 createLohdDir needed = when needed (createDirectory =<< lohdDirPath)
 
 pidPath ∷ IO FilePath
-pidPath = (</> "loh.pid") <$> lohdDirPath
+pidPath = (</> "lohd.pid") <$> lohdDirPath
+
+lohdLogFilename ∷ IO FilePath
+lohdLogFilename = (</> "lohd.log") <$> lohdDirPath
 
 pidRead ∷ IO (Maybe ProcessID)
-pidRead = handle (\(SomeException _) → return Nothing) (readMaybe <$> (readFile =<< pidPath))
+pidRead = Control.Exception.handle (\(SomeException _) → return Nothing) (readMaybe <$> (readFile =<< pidPath))
 
 pidExist ∷ IO Bool
 pidExist = fileExist =<< pidPath
@@ -100,4 +118,3 @@ kill = do
       removeLink =<< pidPath
       return True
     Nothing → return False
-

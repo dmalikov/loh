@@ -58,6 +58,7 @@ Library
                         Loh.Core.Players.Mpd,
                         Loh.Core.Task,
                         Loh.Core.Types,
+                        Loh.Server.Scrobbler,
                         Mocp
 
   Extensions:           UnicodeSyntax
