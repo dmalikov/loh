@@ -24,26 +24,29 @@ flag without_client
   default: False
 
 Library
-  Build-Depends:        base >= 3 && < 5,
+  Build-Depends:        aeson,
+                        base >= 3 && < 5,
+                        bytestring,
                         containers,
                         directory,
                         filepath,
-                        libmpd >= 0.8 && < 0.9,
-                        liblastfm >= 0.0.3.3 && < 0.0.4,
+                        ghc-prim,
+                        hdaemonize,
+                        hslogger,
+                        liblastfm >= 0.0.3.3,
+                        libmpd >= 0.8,
+                        monad-loops,
                         mtl,
                         network,
                         old-locale,
+                        optparse-applicative,
                         process,
                         split,
-                        time,
-                        aeson,
-                        bytestring,
-                        vector,
                         text,
+                        time,
+                        unix,
                         unordered-containers,
-                        hslogger,
-                        ghc-prim,
-                        monad-loops
+                        vector
 
   HS-Source-Dirs:       src/, src/libmocp/
 
