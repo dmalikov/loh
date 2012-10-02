@@ -4,23 +4,16 @@ module Loh.Server.Scrobbler
   ) where
 
 import Control.Applicative ((<$>))
-import Control.Concurrent (forkIO, threadDelay)
-import Control.Exception (handle, SomeException)
-import Control.Monad (forever, void)
+import Control.Concurrent (forkIO)
 import Control.Monad.Loops (dropWhileM)
 import Control.Monad.State
 import Data.Aeson (decode)
-import Data.Maybe (maybe)
 import Network.Socket
 import System.IO
-import System.Log.Logger
-import System.Log.Handler (setFormatter)
-import System.Log.Handler.Simple (streamHandler)
-import System.Log.Formatter (tfLogFormatter)
+import System.Log.Logger (debugM, infoM, warningM)
 import Text.Printf
 
 import qualified Data.ByteString.Lazy.Char8 as BS
-import qualified Data.Sequence as S
 
 import Loh.Core.LastFM.Method
 import Loh.Core.Task
@@ -59,7 +52,7 @@ playerLoop h = do
   playerLoop h
 
 doTask ∷ Task → IO Bool
-doTask (Task taskType config taskTrack@(Track al ar s t)) = do
+doTask (Task taskType config taskTrack@(Track _ ar _ t)) = do
   st ← toCommand config taskTrack
   case st of
     Right _ → do
