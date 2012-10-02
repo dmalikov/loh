@@ -3,11 +3,12 @@ module Main where
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Exception (handle, SomeException(..))
 import Control.Monad (forever, join, liftM2, void, when)
+import GHC.IO.Handle.Types (Handle(..))
 import Options.Applicative
 import System.Directory (createDirectory, getHomeDirectory)
 import System.FilePath.Posix ((</>))
 import System.IO (stderr)
-import System.Log.Logger (Logger(..), Priority(..), setHandlers, setLevel, updateGlobalLogger)
+import System.Log.Logger (Priority(..), setHandlers, setLevel, updateGlobalLogger)
 import System.Log.Handler (LogHandler(..), setFormatter)
 import System.Log.Handler.Simple (fileHandler, GenericHandler(..), streamHandler)
 import System.Log.Formatter (tfLogFormatter)
@@ -47,12 +48,12 @@ main = run =<< execParser opts
                 ( briefDesc
                 & progDesc "Loh daemon")
 
--- stderrHandler ∷ LogHandler α ⇒ IO α
+stderrHandler ∷ IO (GenericHandler Handle)
 stderrHandler = do
   lh ← streamHandler stderr DEBUG
   return $ setFormatter lh $ tfLogFormatter "%F %T" "[$time] ($prio) $loggername: $msg"
 
--- logFileHandler ∷ LogHandler α ⇒ IO α
+logFileHandler ∷ IO (GenericHandler Handle)
 logFileHandler = do
   f ← lohdLogFilename
   lh ← fileHandler f DEBUG
@@ -64,9 +65,9 @@ run (Configuration _ True) = printStatus =<< kill
         printStatus s = do
           if s then putStrLn "Lohd successfully killed"
                else putStrLn "Lohd is not running, there is nothing to kill"
-run (Configuration mode _) = do
+run (Configuration m _) = do
   createLohdDir =<< lohdDirNotExist
-  case mode of
+  case m of
     Foreground → do
       stderrHandler' ← stderrHandler
       process [stderrHandler']
@@ -78,7 +79,7 @@ run (Configuration mode _) = do
                    logFileHandler' ← logFileHandler
                    process [stderrHandler', logFileHandler']
 
--- process ∷ LogHandler α => [α] → IO ()
+process ∷ [GenericHandler Handle] → IO ()
 process handlers = do
   updateGlobalLogger "" (System.Log.Logger.setLevel DEBUG . setHandlers handlers)
   void $ forkIO scrobbler
