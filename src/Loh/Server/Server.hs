@@ -41,28 +41,17 @@ optParser = Configuration
       & help "Kill lohd process"
       )
 
-
 main ∷ IO ()
 main = run =<< execParser opts
   where opts = info (helper <*> optParser)
                 ( briefDesc
                 & progDesc "Loh daemon")
 
-stderrHandler ∷ IO (GenericHandler Handle)
-stderrHandler = do
-  lh ← streamHandler stderr DEBUG
-  return $ setFormatter lh $ tfLogFormatter "%F %T" "[$time] ($prio) $loggername: $msg"
-
-logFileHandler ∷ IO (GenericHandler Handle)
-logFileHandler = do
-  f ← lohdLogFilename
-  lh ← fileHandler f DEBUG
-  return $ setFormatter lh $ tfLogFormatter "%F %T" "[$time] ($prio) $loggername: $msg"
 
 run ∷ Configuration → IO ()
 run (Configuration _ True) = printStatus =<< kill
   where printStatus ∷ Bool → IO ()
-        printStatus s = do
+        printStatus s =
           if s then putStrLn "Lohd successfully killed"
                else putStrLn "Lohd is not running, there is nothing to kill"
 run (Configuration m _) = do
@@ -70,14 +59,28 @@ run (Configuration m _) = do
   case m of
     Foreground → do
       stderrHandler' ← stderrHandler
-      process [stderrHandler']
+      logFileHandler' ← logFileHandler
+      process [stderrHandler', logFileHandler']
     Background → pidExist >>= \exist →
-        if exist then putStrLn "Warning: lohd is already running!"
-                 else daemonize $ do
-                   pidWrite
-                   stderrHandler' ← stderrHandler
-                   logFileHandler' ← logFileHandler
-                   process [stderrHandler', logFileHandler']
+      if exist then putStrLn "Warning: lohd is already running!"
+               else daemonize $ do
+                 pidWrite
+                 stderrHandler' ← stderrHandler
+                 process [stderrHandler']
+  where
+    stderrHandler = do
+      lh ← streamHandler stderr DEBUG
+      return $ setFormatter lh $
+        tfLogFormatter logFormatTimestamp logFormatMessage
+
+    logFileHandler = do
+      f ← lohdLogFilename
+      lh ← fileHandler f DEBUG
+      return $ setFormatter lh $
+        tfLogFormatter logFormatTimestamp logFormatMessage
+
+    logFormatTimestamp = "%F %T"
+    logFormatMessage   = "[$time] ($prio) $loggername: $msg"
 
 process ∷ [GenericHandler Handle] → IO ()
 process handlers = do
