@@ -4,13 +4,14 @@ module Mocp
   , Metadata(..), MocpInfo(..), MocpState(..), Song(..)
   ) where
 
-import Control.Applicative ((<$>))
-import Control.Monad (when)
-import Control.Monad.Error (ErrorT(..), liftIO, runErrorT, throwError)
-import Data.List (isPrefixOf)
-import Data.List.Split (splitOn)
-import GHC.IO.Exception (ExitCode(..))
-import System.Process (readProcessWithExitCode)
+import           Control.Applicative ((<$>))
+import           Control.Monad       (when)
+import           Control.Monad.Error (ErrorT (..), liftIO, runErrorT,
+                                      throwError)
+import           Data.List           (isPrefixOf)
+import           Data.List.Split     (splitOn)
+import           GHC.IO.Exception    (ExitCode (..))
+import           System.Process      (readProcessWithExitCode)
 
 type MocpResponse = Either MocpError
 

@@ -1,20 +1,22 @@
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE CPP                 #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
-import Control.Applicative ((<$>))
-import Control.Exception (SomeException, catch)
-import Network.Lastfm (APIKey(..), Secret(..))
-import Network.Lastfm.JSON.Auth
-import Prelude hiding (catch)
-import System.IO (stderr)
-import System.Log.Logger (Priority(DEBUG, INFO), updateGlobalLogger, setLevel, setHandlers)
-import System.Log.Handler (setFormatter)
-import System.Log.Handler.Simple (streamHandler)
-import System.Log.Formatter (tfLogFormatter)
+import           Control.Applicative       ((<$>))
+import           Control.Exception         (SomeException, catch)
+import           Network.Lastfm            (APIKey (..), Secret (..))
+import           Network.Lastfm.JSON.Auth
+import           Prelude                   hiding (catch)
+import           System.IO                 (stderr)
+import           System.Log.Formatter      (tfLogFormatter)
+import           System.Log.Handler        (setFormatter)
+import           System.Log.Handler.Simple (streamHandler)
+import           System.Log.Logger         (Priority (DEBUG, INFO), setHandlers,
+                                            setLevel, updateGlobalLogger)
 
-import Loh.Client.Config (LConfig(..), readConfig, writeConfig)
-import Loh.Client.Eventer
+import           Loh.Client.Config         (LConfig (..), readConfig,
+                                            writeConfig)
+import           Loh.Client.Eventer
 
 
 debugLevel ∷ Priority

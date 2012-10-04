@@ -1,11 +1,11 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE OverloadedStrings    #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 module Loh.Core.Types where
 
-import Control.Applicative ((<*>), (<$>), empty)
-import Data.Aeson
-import Data.Function (on)
+import           Control.Applicative (empty, (<$>), (<*>))
+import           Data.Aeson
+import           Data.Function       (on)
 
 
 -- TrackInfo

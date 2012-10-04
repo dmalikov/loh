@@ -1,21 +1,21 @@
 module Loh.Client.Eventer (eventer) where
 
-import Control.Concurrent (forkIO, threadDelay)
-import Control.Monad (forever, forM_, void, when)
-import Data.Aeson (encode)
-import Data.Function (on)
-import Network
-import System.IO
-import System.Log.Logger (debugM, infoM, warningM)
-import Text.Printf (printf)
+import           Control.Concurrent         (forkIO, threadDelay)
+import           Control.Monad              (forM_, forever, void, when)
+import           Data.Aeson                 (encode)
+import           Data.Function              (on)
+import           Network
+import           System.IO
+import           System.Log.Logger          (debugM, infoM, warningM)
+import           Text.Printf                (printf)
 
 import qualified Data.ByteString.Lazy.Char8 as BS
 
-import Loh.Client.Config (LConfig(..))
-import Loh.Core.LastFM.Auth
-import Loh.Core.LastFM.Method
-import Loh.Core.Task
-import Loh.Core.Types
+import           Loh.Client.Config          (LConfig (..))
+import           Loh.Core.LastFM.Auth
+import           Loh.Core.LastFM.Method
+import           Loh.Core.Task
+import           Loh.Core.Types
 
 
 eventer ∷ LConfig → IO ()

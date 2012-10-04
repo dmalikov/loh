@@ -1,25 +1,27 @@
 module Main where
 
-import Control.Concurrent (forkIO, threadDelay)
-import Control.Exception (handle, SomeException(..))
-import Control.Monad (forever, join, liftM2, void, when)
-import GHC.IO.Handle.Types (Handle(..))
-import Options.Applicative
-import System.Directory (createDirectory, getHomeDirectory)
-import System.FilePath.Posix ((</>))
-import System.IO (stderr)
-import System.Log.Logger (Priority(..), setHandlers, setLevel, updateGlobalLogger)
-import System.Log.Handler (LogHandler(..), setFormatter)
-import System.Log.Handler.Simple (fileHandler, GenericHandler(..), streamHandler)
-import System.Log.Formatter (tfLogFormatter)
-import System.Posix.Daemonize
-import System.Posix.Files (fileExist, removeLink)
-import System.Posix.Process (getProcessID)
-import System.Posix.Signals (signalProcess)
-import System.Posix.Types
-import Text.Read (readMaybe)
+import           Control.Concurrent        (forkIO, threadDelay)
+import           Control.Exception         (SomeException (..), handle)
+import           Control.Monad             (forever, join, liftM2, void, when)
+import           GHC.IO.Handle.Types       (Handle (..))
+import           Options.Applicative
+import           System.Directory          (createDirectory, getHomeDirectory)
+import           System.FilePath.Posix     ((</>))
+import           System.IO                 (stderr)
+import           System.Log.Formatter      (tfLogFormatter)
+import           System.Log.Handler        (LogHandler (..), setFormatter)
+import           System.Log.Handler.Simple (GenericHandler (..), fileHandler,
+                                            streamHandler)
+import           System.Log.Logger         (Priority (..), setHandlers,
+                                            setLevel, updateGlobalLogger)
+import           System.Posix.Daemonize
+import           System.Posix.Files        (fileExist, removeLink)
+import           System.Posix.Process      (getProcessID)
+import           System.Posix.Signals      (signalProcess)
+import           System.Posix.Types
+import           Text.Read                 (readMaybe)
 
-import Loh.Server.Scrobbler
+import           Loh.Server.Scrobbler
 
 data Configuration = Configuration
   { mode ∷ Mode

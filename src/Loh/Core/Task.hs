@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Loh.Core.Task where
 
-import Control.Applicative ((<*>), (<$>), empty)
-import Data.Aeson
+import           Control.Applicative  (empty, (<$>), (<*>))
+import           Data.Aeson
 
-import Loh.Core.LastFM.Auth
-import Loh.Core.Types
+import           Loh.Core.LastFM.Auth
+import           Loh.Core.Types
 
 data Task = Task TaskType LFMConfig Track
   deriving (Show)

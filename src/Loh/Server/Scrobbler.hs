@@ -3,21 +3,21 @@ module Loh.Server.Scrobbler
   ( scrobbler
   ) where
 
-import Control.Applicative ((<$>))
-import Control.Concurrent (forkIO)
-import Control.Monad.Loops (dropWhileM)
-import Control.Monad.State
-import Data.Aeson (decode)
-import Network.Socket
-import System.IO
-import System.Log.Logger (debugM, infoM, warningM)
-import Text.Printf
+import           Control.Applicative        ((<$>))
+import           Control.Concurrent         (forkIO)
+import           Control.Monad.Loops        (dropWhileM)
+import           Control.Monad.State
+import           Data.Aeson                 (decode)
+import           Network.Socket
+import           System.IO
+import           System.Log.Logger          (debugM, infoM, warningM)
+import           Text.Printf
 
 import qualified Data.ByteString.Lazy.Char8 as BS
 
-import Loh.Core.LastFM.Method
-import Loh.Core.Task
-import Loh.Core.Types
+import           Loh.Core.LastFM.Method
+import           Loh.Core.Task
+import           Loh.Core.Types
 
 
 scrobbler ∷ IO ()
@@ -36,7 +36,7 @@ serve sock = do
   hSetBuffering h LineBuffering
   void $ forkIO $ evalStateT (playerLoop h) []
 
-playerLoop :: Handle → StateT [Task] IO ()
+playerLoop ∷ Handle → StateT [Task] IO ()
 playerLoop h = do
   newTask  ← lift $ decode <$> BS.hGetContents h
   taskDone ← lift $ maybe (return False) doTask newTask

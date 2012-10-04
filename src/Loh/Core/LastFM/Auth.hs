@@ -1,13 +1,13 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE OverloadedStrings    #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 module Loh.Core.LastFM.Auth where
 
-import Control.Applicative ((<*>), (<$>), empty)
-import Data.Aeson
+import           Control.Applicative (empty, (<$>), (<*>))
+import           Data.Aeson
 
-import qualified Network.Lastfm as LFM
+import qualified Network.Lastfm      as LFM
 
 type LFMConfig = (LFM.APIKey, LFM.SessionKey, LFM.Secret)
 

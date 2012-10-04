@@ -1,30 +1,30 @@
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE BangPatterns      #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Loh.Client.Config
   ( LConfig(..)
   , readConfig, writeConfig
   ) where
 
-import Control.Applicative ((<$>), empty)
-import Data.Aeson hiding (encode)
-import Data.List (intersperse)
-import Data.Monoid ((<>), mconcat)
-import Data.Text (Text)
-import Data.Text.Lazy.Builder (Builder, toLazyText)
-import Data.Text.Lazy.Encoding (encodeUtf8)
-import Network.Lastfm hiding (Value)
-import System.Directory (getHomeDirectory)
-import System.FilePath ((</>))
-import System.IO (IOMode(ReadMode), withFile)
+import           Control.Applicative     (empty, (<$>))
+import           Data.Aeson              hiding (encode)
+import           Data.List               (intersperse)
+import           Data.Monoid             (mconcat, (<>))
+import           Data.Text               (Text)
+import           Data.Text.Lazy.Builder  (Builder, toLazyText)
+import           Data.Text.Lazy.Encoding (encodeUtf8)
+import           Network.Lastfm          hiding (Value)
+import           System.Directory        (getHomeDirectory)
+import           System.FilePath         ((</>))
+import           System.IO               (IOMode (ReadMode), withFile)
 
-import qualified Data.Aeson.Encode as A (fromValue)
-import qualified Data.ByteString.Lazy as B
-import qualified Data.HashMap.Strict as H (toList)
-import qualified Data.Vector as V (toList)
+import qualified Data.Aeson.Encode       as A (fromValue)
+import qualified Data.ByteString.Lazy    as B
+import qualified Data.HashMap.Strict     as H (toList)
+import qualified Data.Vector             as V (toList)
 
-import Loh.Core.LastFM.Auth
-import Loh.Core.Players
-import Loh.Core.Types
+import           Loh.Core.LastFM.Auth
+import           Loh.Core.Players
+import           Loh.Core.Types
 
 
 data LConfig = LConfig
