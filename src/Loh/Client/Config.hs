@@ -81,7 +81,7 @@ genConfigSkeleton = do
     , "Authorize your token: " ++ getAuthorizeTokenLink apiKey token
     , "And then press any key."
     ]
-  getChar
+  _ ← getChar
   sk ← extract <$> getSession apiKey token secret
   writeConfig LConfig
     { players = []
