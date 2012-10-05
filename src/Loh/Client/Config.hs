@@ -2,25 +2,26 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Loh.Client.Config
   ( LConfig(..)
-  , readConfig, writeConfig
+  , genConfigSkeleton, readConfig, writeConfig
   ) where
 
-import           Control.Applicative     (empty, (<$>))
-import           Data.Aeson              hiding (encode)
-import           Data.List               (intersperse)
-import           Data.Monoid             (mconcat, (<>))
-import           Data.Text               (Text)
-import           Data.Text.Lazy.Builder  (Builder, toLazyText)
-import           Data.Text.Lazy.Encoding (encodeUtf8)
-import           Network.Lastfm          hiding (Value)
-import           System.Directory        (getHomeDirectory)
-import           System.FilePath         ((</>))
-import           System.IO               (IOMode (ReadMode), withFile)
+import           Control.Applicative      (empty, (<$>))
+import           Data.Aeson               hiding (encode)
+import           Data.List                (intersperse)
+import           Data.Monoid              (mconcat, (<>))
+import           Data.Text                (Text)
+import           Data.Text.Lazy.Builder   (Builder, toLazyText)
+import           Data.Text.Lazy.Encoding  (encodeUtf8)
+import           Network.Lastfm           hiding (Value)
+import           Network.Lastfm.JSON.Auth
+import           System.Directory         (getHomeDirectory)
+import           System.FilePath          ((</>))
+import           System.IO                (IOMode (ReadMode), withFile)
 
-import qualified Data.Aeson.Encode       as A (fromValue)
-import qualified Data.ByteString.Lazy    as B
-import qualified Data.HashMap.Strict     as H (toList)
-import qualified Data.Vector             as V (toList)
+import qualified Data.Aeson.Encode        as A (fromValue)
+import qualified Data.ByteString.Lazy     as B
+import qualified Data.HashMap.Strict      as H (toList)
+import qualified Data.Vector              as V (toList)
 
 import           Loh.Core.LastFM.Auth
 import           Loh.Core.Players
@@ -70,6 +71,34 @@ writeConfig config = do
   B.writeFile (hd </> configFileName) (encode config)
  where
   encode = encodeUtf8 . toLazyText . fromValue 0 . toJSON
+
+genConfigSkeleton ∷ IO (Maybe LConfig)
+genConfigSkeleton = do
+  token ← extract <$> getToken apiKey
+  putStrLn $ unlines
+    [ "~/.lohrc seems to be missing"
+    , "You need correct session key to use loh properly."
+    , "Authorize your token: " ++ getAuthorizeTokenLink apiKey token
+    , "And then press any key."
+    ]
+  getChar
+  sk ← extract <$> getSession apiKey token secret
+  writeConfig LConfig
+    { players = []
+    , lfmConfig = (apiKey, sk, secret)
+    , serverHost = "127.0.0.1"
+    }
+  putStrLn $ unlines
+    [ "Session key is successfuly written to ~/.lohrc"
+    , "Add players you wish to scrobble from and restart loh."
+    ]
+  return Nothing
+ where
+  apiKey = APIKey "34a538d1ce307a257c695bcc7e031392"
+  secret = Secret "4bd6283d6441cdf842d03ba8ab7a6ddf"
+
+  extract (Left e) = error $ show e
+  extract (Right v) = v
 
 
 configFileName ∷ String
