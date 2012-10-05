@@ -58,6 +58,8 @@ Library
                         Loh.Core.Players.Mpd,
                         Loh.Core.Task,
                         Loh.Core.Types,
+                        Loh.Client.Config,
+                        Loh.Client.Eventer,
                         Loh.Server.Scrobbler,
                         Mocp
 
