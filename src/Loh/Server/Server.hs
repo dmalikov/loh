@@ -2,7 +2,9 @@ module Main where
 
 import           Control.Concurrent        (forkIO, threadDelay)
 import           Control.Exception         (SomeException (..), handle)
+import           Control.Exception.Base    (try)
 import           Control.Monad             (forever, join, liftM2, void, when)
+import           Foreign.C.Types           (CInt (..))
 import           GHC.IO.Handle.Types       (Handle (..))
 import           Options.Applicative
 import           System.Directory          (createDirectory, getHomeDirectory)
@@ -15,9 +17,9 @@ import           System.Log.Handler.Simple (GenericHandler (..), fileHandler,
 import           System.Log.Logger         (Priority (..), setHandlers,
                                             setLevel, updateGlobalLogger)
 import           System.Posix.Daemonize
-import           System.Posix.Files        (fileExist, removeLink)
+import           System.Posix.Files        (fileExist)
 import           System.Posix.Process      (getProcessID)
-import           System.Posix.Signals      (signalProcess)
+import           System.Posix.Signals      (nullSignal, sigKILL, signalProcess)
 import           System.Posix.Types
 import           Text.Read                 (readMaybe)
 
@@ -49,7 +51,6 @@ main = run =<< execParser opts
                 ( briefDesc
                 & progDesc "Loh daemon")
 
-
 run ∷ Configuration → IO ()
 run (Configuration _ True) = printStatus =<< kill
   where printStatus ∷ Bool → IO ()
@@ -63,8 +64,8 @@ run (Configuration m _) = do
       stderrHandler' ← stderrHandler
       logFileHandler' ← logFileHandler
       process [stderrHandler', logFileHandler']
-    Background → pidExist >>= \exist →
-      if exist then putStrLn "Warning: lohd is already running!"
+    Background → pidAlive >>= \alive →
+      if alive then putStrLn "Warning: lohd is already running!"
                else daemonize $ do
                  pidWrite
                  stderrHandler' ← stderrHandler
@@ -106,21 +107,22 @@ lohdLogFilename ∷ IO FilePath
 lohdLogFilename = (</> "lohd.log") <$> lohdDirPath
 
 pidRead ∷ IO (Maybe ProcessID)
-pidRead = Control.Exception.handle (\(SomeException _) → return Nothing) (readMaybe <$> (readFile =<< pidPath))
-
-pidExist ∷ IO Bool
-pidExist = fileExist =<< pidPath
+pidRead = handle' $ readMaybe `fmap` (readFile =<< pidPath)
+  where
+    handle' = Control.Exception.handle $ \(SomeException _) → return Nothing
 
 pidWrite ∷ IO ()
 pidWrite = bind2 writeFile pidPath (show <$> getProcessID)
   where bind2 f a b = join $ liftM2 f a b
 
+pidAlive ∷ IO Bool
+pidAlive = signalAndHandle nullSignal
+
 kill ∷ IO Bool
-kill = do
-  maybePid ← pidRead
-  case maybePid of
-    Just p → do
-      signalProcess 9 p
-      removeLink =<< pidPath
-      return True
-    Nothing → return False
+kill = signalAndHandle sigKILL
+
+signalAndHandle ∷ CInt → IO Bool
+signalAndHandle s = maybe (return False) send =<< pidRead
+  where
+    send pid = either (const False) (const True) <$>
+      (try (signalProcess s pid) :: IO (Either IOError ()))
