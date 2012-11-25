@@ -1,19 +1,27 @@
 module Main where
 
-import Control.Monad (forM_)
-import Text.Printf
+import           Control.Concurrent         (forkIO)
+import           Control.Monad              (forM_, void)
+import           Data.Aeson                 (encode)
+import qualified Data.ByteString.Lazy.Char8 as BS
+import           Network
+import           System.IO
 
-import Loh.Config
-import Loh.LoveTrack
-import Loh.Player
-import Loh.Types
+import           Loh.Client.Config          (LConfig (..), readConfig)
+import           Loh.Core.Task
+import           Loh.Core.Types
 
 main ∷ IO ()
 main = do
-  config ← getConfig
-  currentTracks ← getCurrentTracks
-  if null currentTracks
-    then putStrLn "Error: Nothing to love"
-    else forM_ currentTracks $ \τ → do
-      loveTrack config τ
-      printf "Loved \"%s - %s\"\n" (artist τ) (track τ)
+  maybeConfig ← readConfig
+  case maybeConfig of
+    Just config → do
+      forM_ (players config) $ \ρ → withSocketsDo $ do
+        h ← connectTo (serverHost config) (PortNumber lohPort)
+        hSetBuffering h LineBuffering
+        void . forkIO $ do
+          maybeTrack ← getInfo ρ
+          case maybeTrack of
+            Just τ → BS.hPut h $ encode $ Task Love (lfmConfig config) $ toTrack τ
+            _ → return ()
+    _ → return ()

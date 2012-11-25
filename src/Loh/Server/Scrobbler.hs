@@ -40,7 +40,7 @@ playerLoop ∷ Handle → StateT [Task] IO ()
 playerLoop h = do
   newTask  ← lift $ decode <$> BS.hGetContents h
   taskDone ← lift $ maybe (return False) doTask newTask
-  unless taskDone $ modify (maybe id (:) newTask)
+  unless taskDone $ modify $ maybe id (:) newTask
   -- handle failed tasks
   when taskDone $ do
     tasks ← get
@@ -63,6 +63,7 @@ doTask (Task taskType config taskTrack@(Track _ ar _ t)) = do
       return False
   where
     toCommand = case taskType of
+                  Love → loveTrack
                   Scrobble → scrobbleTrack
                   UpdateNowPlaying → nowPlaying
 
@@ -72,5 +73,6 @@ doTask (Task taskType config taskTrack@(Track _ ar _ t)) = do
 
     taskName ∷ String
     taskName = case taskType of
+                 Love → "add to loved tracks"
                  Scrobble → "scrobble"
                  UpdateNowPlaying → "now playing"
