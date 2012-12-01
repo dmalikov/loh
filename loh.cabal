@@ -84,8 +84,3 @@ Executable              lohd
   Main-is:              Server.hs
   HS-Source-Dirs:       src/, src/Loh/Server/
   Extensions:           UnicodeSyntax
-
-Executable              loh-lovetrack-np
-  Main-is:              loh-lovetrack-np.hs
-  HS-Source-Dirs:       tools/, src/, src/libmocp
-  Extensions:           UnicodeSyntax

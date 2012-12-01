@@ -10,7 +10,7 @@ import           Loh.Core.Types
 data Task = Task TaskType LFMConfig Track
   deriving (Show)
 
-data TaskType = Love | Scrobble | UpdateNowPlaying
+data TaskType = Scrobble | UpdateNowPlaying
   deriving (Eq, Read, Show)
 
 data Track = Track (Maybe Album) Artist (Maybe Sec) Title

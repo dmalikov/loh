@@ -63,7 +63,6 @@ doTask (Task taskType config taskTrack@(Track _ ar _ t)) = do
       return False
   where
     toCommand = case taskType of
-                  Love → loveTrack
                   Scrobble → scrobbleTrack
                   UpdateNowPlaying → nowPlaying
 
@@ -73,6 +72,5 @@ doTask (Task taskType config taskTrack@(Track _ ar _ t)) = do
 
     taskName ∷ String
     taskName = case taskType of
-                 Love → "add to loved tracks"
                  Scrobble → "scrobble"
                  UpdateNowPlaying → "now playing"
