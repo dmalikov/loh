@@ -47,10 +47,11 @@ fetchAccur = 3
 
 -- | Fetch player for specific trackInfo until it will be able to scrobble
 followUntilReadyToScrobble ∷ Player → TrackInfo → Int → IO Bool
-followUntilReadyToScrobble ρ ti timeToFollow
+followUntilReadyToScrobble ρ ti@(TrackInfo {artist = ar, title = t}) timeToFollow
   | timeToFollow < 0 = return True
   | otherwise = do
-    debugM "Eventer" $ logMessageP ρ ("following... " ++ show timeToFollow ++ " secs to scrobble")
+    debugM "Eventer" $ logMessageP ρ $
+      printf "following %s - %s, %d secs to scrobble" (show ar) (show t) timeToFollow
     threadDelayS fetchDelay
     trackInfo' ← getInfo ρ
     case trackInfo' of
