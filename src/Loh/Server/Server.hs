@@ -52,9 +52,9 @@ main = run =<< execParser opts
                 & progDesc "Loh daemon")
 
 run ∷ Configuration → IO ()
-run (Configuration _ True) = printStatus =<< kill
-  where printStatus ∷ Bool → IO ()
-        printStatus s =
+run (Configuration _ True) = printKillStatus =<< kill
+  where printKillStatus ∷ Bool → IO ()
+        printKillStatus s =
           if s then putStrLn "Lohd successfully killed"
                else putStrLn "Lohd is not running, there is nothing to kill"
 run (Configuration m _) = do
