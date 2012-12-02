@@ -14,7 +14,7 @@ import           System.Log.Formatter      (tfLogFormatter)
 import           System.Log.Handler        (LogHandler (..), setFormatter)
 import           System.Log.Handler.Simple (GenericHandler (..), fileHandler,
                                             streamHandler)
-import           System.Log.Logger         (Priority (..), setHandlers,
+import           System.Log.Logger         (Priority (..), infoM, setHandlers,
                                             setLevel, updateGlobalLogger)
 import           System.Posix.Daemonize
 import           System.Posix.Files        (fileExist)
@@ -68,8 +68,8 @@ run (Configuration m _) = do
       if alive then putStrLn "Warning: lohd is already running!"
                else daemonize $ do
                  pidWrite
-                 stderrHandler' ← stderrHandler
-                 process [stderrHandler']
+                 logFileHandler' ← logFileHandler
+                 process [logFileHandler']
   where
     stderrHandler = do
       lh ← streamHandler stderr DEBUG
@@ -88,6 +88,7 @@ run (Configuration m _) = do
 process ∷ [GenericHandler Handle] → IO ()
 process handlers = do
   updateGlobalLogger "" (System.Log.Logger.setLevel DEBUG . setHandlers handlers)
+  infoM "Process" $ "lohd successfully started!"
   void $ forkIO scrobbler
   forever $ threadDelay 1000000
 
