@@ -1,5 +1,5 @@
 module Loh.Core.LastFM.Method
-  ( loveTrack, nowPlaying, scrobbleTrack
+  ( nowPlaying, scrobbleTrack
   ) where
 
 import           Control.Applicative       ((<$>))
@@ -13,10 +13,6 @@ import qualified Network.Lastfm.JSON.Track as Track
 import           Loh.Core.LastFM.Auth
 import           Loh.Core.Task
 
-
-loveTrack ∷ LFMConfig → Track → Lastfm Response
-loveTrack (ak, sk, s) (Track _ ar _ t) =
-  Track.love (LFM.Artist ar) (LFM.Track t) ak sk s
 
 nowPlaying ∷ LFMConfig → Track → Lastfm Response
 nowPlaying (ak, sk, s) (Track al ar l t) =
