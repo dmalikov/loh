@@ -16,49 +16,19 @@ Cabal-version:          >= 1.6
 Homepage:               https://github.com/dmalikov/loh
 
 Library
-  Build-Depends:        aeson,
-                        base >= 3 && < 5,
-                        bytestring,
-                        containers,
-                        directory,
-                        filepath,
-                        ghc-prim,
-                        hdaemonize,
-                        hslogger,
-                        liblastfm >= 0.0.3.3,
-                        libmpd >= 0.8,
-                        monad-loops,
-                        mtl,
-                        network,
-                        old-locale,
-                        optparse-applicative,
-                        process,
-                        split,
-                        text,
-                        time,
-                        unix,
-                        unordered-containers,
-                        vector
-
+  Build-Depends:        base >= 4 && < 5,
+                        liblastfm >= 0.0.4
   HS-Source-Dirs:       src
-
-  Exposed-Modules:      Loh.Core.LastFM.Auth
-                        Loh.Core.LastFM.Method
-                        Loh.Core.Players
-                        Loh.Core.Players.Kludges
-                        Loh.Core.Players.Mpd
-                        Loh.Core.Task
-                        Loh.Core.Types
-                        Loh.Client.Config
-                        Loh.Client.Eventer
-                        Loh.Server.Scrobbler
-
+  Exposed-Modules:      Loh.Client
   Extensions:           UnicodeSyntax
-
   GHC-Options:          -Wall
 
 
 Executable              lohd
-  Main-is:              Server.hs
-  HS-Source-Dirs:       src/, src/Loh/Server/
-  Extensions:           UnicodeSyntax
+  Main-is:              Loh/Server.hs
+  Build-Depends:        base >= 4 && < 5,
+                        bytestring,
+                        liblastfm >= 0.0.4,
+                        mtl,
+                        network
+  HS-Source-Dirs:       src
