@@ -17,7 +17,8 @@ Homepage:               https://github.com/dmalikov/loh
 
 Library
   Build-Depends:        base >= 4 && < 5,
-                        liblastfm >= 0.0.4
+                        liblastfm >= 0.0.4,
+                        cereal
   HS-Source-Dirs:       src
   Exposed-Modules:      Loh.Client
   Extensions:           UnicodeSyntax
@@ -30,5 +31,6 @@ Executable              lohd
                         bytestring,
                         liblastfm >= 0.0.4,
                         mtl,
-                        network
+                        network,
+                        cereal
   HS-Source-Dirs:       src

@@ -1,8 +1,8 @@
 {-# LANGUAGE DataKinds #-}
 module Loh.Client (send, LohClientException(..)) where
 
-import           Data.ByteString (ByteString)
 import qualified Data.ByteString as B
+import           Data.Serialize (encode)
 import           Network.Lastfm
 import           Network
 import           System.IO (hClose)
@@ -28,7 +28,3 @@ send r host port = do
   h <- connectTo host (PortNumber $ fromIntegral port)
   B.hPut h (encode (finalize r))
   hClose h
-
-
-encode :: R JSON Send Ready -> ByteString
-encode = undefined

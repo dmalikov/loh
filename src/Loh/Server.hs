@@ -5,9 +5,9 @@ module Main where
 import           Control.Concurrent         (forkIO)
 import           System.IO
 
-import           Data.ByteString (ByteString)
-import qualified Data.ByteString as B
 import           Control.Monad.State
+import qualified Data.ByteString as B
+import           Data.Serialize (decode)
 import           Network.Socket
 import           Network.Lastfm
 
@@ -36,18 +36,17 @@ serve sock = do
 -- | Broken
 playerLoop :: Handle -> StateT [R JSON Send Ready] IO ()
 playerLoop h = do
-  newTask  <- lift $ decode <$> B.hGetContents h
-  taskDone <- lift $ doTask newTask
-  unless taskDone $ modify $ (:) newTask
-  playerLoop h
+  nT <- lift $ decode <$> B.hGetContents h
+  case nT of
+    Left _ -> return ()
+    Right newTask -> do
+      taskDone <- lift $ doTask newTask
+      unless taskDone $ modify $ (:) newTask
+      playerLoop h
 
 
 doTask :: R JSON Send Ready -> IO Bool
 doTask r = lastfm' r >> return True
-
-
-decode :: ByteString -> R JSON Send Ready
-decode = undefined
 
 
 lohPort :: PortNumber
