@@ -15,14 +15,6 @@ Build-type:             Simple
 Cabal-version:          >= 1.6
 Homepage:               https://github.com/dmalikov/loh
 
-flag debug
-  description: Enable DEBUG logging.
-  default: False
-
-flag without_client
-  description: Compile lohd without a client
-  default: False
-
 Library
   Build-Depends:        aeson,
                         base >= 3 && < 5,
@@ -66,18 +58,6 @@ Library
   Extensions:           UnicodeSyntax
 
   GHC-Options:          -Wall
-
-
-Executable              loh
-  Main-is:              Client.hs
-  HS-Source-Dirs:       src/, src/Loh/Client/, src/libmocp/
-  Extensions:           UnicodeSyntax
-
-  if flag(debug)
-    CPP-Options:        -D__DEBUG__
-
-  if flag(without_client)
-    buildable:          False
 
 
 Executable              lohd
