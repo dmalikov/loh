@@ -5,6 +5,7 @@ import           Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import           Network.Lastfm
 import           Network
+import           System.IO (hClose)
 
 
 data LohClientException =
@@ -23,9 +24,10 @@ send :: Request JSON Send Ready -- ^ Request to send
      -> String                  -- ^ Loh hostname
      -> Int                     -- ^ Loh port
      -> IO ()
-send r h p = do
-  q <- connectTo h (PortNumber $ fromIntegral p)
-  B.hPut q (encode (finalize r))
+send r host port = do
+  h <- connectTo host (PortNumber $ fromIntegral port)
+  B.hPut h (encode (finalize r))
+  hClose h
 
 
 encode :: R JSON Send Ready -> ByteString
