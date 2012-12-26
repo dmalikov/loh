@@ -40,20 +40,18 @@ Library
                         unordered-containers,
                         vector
 
-  HS-Source-Dirs:       src/, src/libmocp/
+  HS-Source-Dirs:       src
 
   Exposed-Modules:      Loh.Core.LastFM.Auth
-                        Loh.Core.LastFM.Method,
-                        Loh.Core.Players,
-                        Loh.Core.Players.Kludges,
-                        Loh.Core.Players.Mocp,
-                        Loh.Core.Players.Mpd,
-                        Loh.Core.Task,
-                        Loh.Core.Types,
-                        Loh.Client.Config,
-                        Loh.Client.Eventer,
-                        Loh.Server.Scrobbler,
-                        Mocp
+                        Loh.Core.LastFM.Method
+                        Loh.Core.Players
+                        Loh.Core.Players.Kludges
+                        Loh.Core.Players.Mpd
+                        Loh.Core.Task
+                        Loh.Core.Types
+                        Loh.Client.Config
+                        Loh.Client.Eventer
+                        Loh.Server.Scrobbler
 
   Extensions:           UnicodeSyntax
 

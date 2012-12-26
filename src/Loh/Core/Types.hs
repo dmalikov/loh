@@ -54,7 +54,7 @@ data Player = Player
   , getInfo ∷ IO (Maybe TrackInfo)
   }
 
-data PlayerName = Mocp | Mpd
+data PlayerName = Mpd
   deriving (Eq, Ord, Read, Show)
 
 
