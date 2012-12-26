@@ -7,6 +7,7 @@ import Network.Lastfm
 data LohClientException =
     LohServerNotFound
   | LohEncryptionIsBroken
+  | LohRequestIsDefinitelyBroken
   | LohRequestIsBroken
   | LohUnknownException
 
