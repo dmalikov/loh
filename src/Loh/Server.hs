@@ -9,7 +9,7 @@ import           Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import           Control.Monad.State
 import           Network.Socket
-import           Network.Lastfm hiding (get)
+import           Network.Lastfm
 
 
 main :: IO ()
