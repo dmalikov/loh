@@ -19,14 +19,14 @@ data LohClientException =
 --
 -- If request is accepted when there would be no response.
 -- Otherwise it would throw on of exceptions defined here
-send :: Request f Send Ready -- ^ Request to send
-     -> String               -- ^ Loh hostname
-     -> Int                  -- ^ Loh port
+send :: Request JSON Send Ready -- ^ Request to send
+     -> String                  -- ^ Loh hostname
+     -> Int                     -- ^ Loh port
      -> IO ()
 send r h p = do
   q <- connectTo h (PortNumber $ fromIntegral p)
-  B.hPut q (encode r)
+  B.hPut q (encode (finalize r))
 
 
-encode :: Request f Send Ready -> ByteString
+encode :: R JSON Send Ready -> ByteString
 encode = undefined
