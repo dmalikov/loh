@@ -50,9 +50,5 @@ decode :: ByteString -> R JSON Send Ready
 decode = undefined
 
 
-lastfm' :: R JSON Send Ready -> IO (Response JSON)
-lastfm' = undefined
-
-
 lohPort :: PortNumber
 lohPort = 9114
