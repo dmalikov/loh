@@ -1,7 +1,10 @@
 {-# LANGUAGE DataKinds #-}
 module Loh.Client (send, LohClientException(..)) where
 
-import Network.Lastfm
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString as B
+import           Network.Lastfm
+import           Network
 
 
 data LohClientException =
@@ -20,4 +23,10 @@ send :: Request f Send Ready -- ^ Request to send
      -> String               -- ^ Loh hostname
      -> Int                  -- ^ Loh port
      -> IO ()
-send = undefined
+send r h p = do
+  q <- connectTo h (PortNumber $ fromIntegral p)
+  B.hPut q (encode r)
+
+
+encode :: Request f Send Ready -> ByteString
+encode = undefined
