@@ -3,6 +3,7 @@
 module Main where
 
 import Control.Concurrent (forkIO)
+import Control.Exception (catch)
 import Control.Monad
 import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef')
 import System.IO
@@ -11,6 +12,8 @@ import           Control.Lens
 import qualified Data.ByteString as B
 import           Data.Serialize (decode)
 import           Network
+import qualified Network.HTTP.Conduit as C
+import qualified Network.HTTP.Types as C
 import           Network.Lastfm
 import           Network.Lastfm.Internal
 
@@ -45,6 +48,16 @@ broken r = view (query . _at "method") r `notElem`
   , "track.updateNowPlaying"
   , "track.love"
   ]
+
+
+runJob :: Job -> IO Bool
+runJob j = do
+  catch (lastfm' j >> return True) (return . badJob)
+ where
+  badJob :: C.HttpException -> Bool
+  badJob (C.StatusCodeException s _) = C.statusIsClientError s
+  badJob (C.ResponseTimeout) = False
+  badJob _ = True
 
 
 report :: Pool -> IO ()
