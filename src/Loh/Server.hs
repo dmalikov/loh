@@ -4,7 +4,7 @@ module Main where
 
 import Control.Concurrent (forkIO)
 import Control.Monad
-import Data.IORef (IORef, newIORef, atomicModifyIORef')
+import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef')
 import System.IO
 
 import           Control.Lens
@@ -45,3 +45,9 @@ broken r = view (query . _at "method") r `notElem`
   , "track.updateNowPlaying"
   , "track.love"
   ]
+
+
+report :: Pool -> IO ()
+report pref = do
+  pool <- readIORef pref
+  putStrLn $ "there are " ++ show (length pool) ++ " jobs currently pending."
