@@ -5,7 +5,7 @@ module Main where
 import Control.Concurrent (forkIO)
 import Control.Exception (catch)
 import Control.Monad
-import Data.IORef (IORef, newIORef, readIORef, atomicModifyIORef')
+import Data.IORef (IORef, newIORef, readIORef, writeIORef, atomicModifyIORef')
 import System.IO
 
 import           Control.Lens
@@ -48,6 +48,10 @@ broken r = view (query . _at "method") r `notElem`
   , "track.updateNowPlaying"
   , "track.love"
   ]
+
+
+runJobs :: Pool -> IO ()
+runJobs pref = readIORef pref >>= filterM runJob >>= writeIORef pref
 
 
 runJob :: Job -> IO Bool
