@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Control.Concurrent (forkIO)
+import Control.Concurrent (forkIO, threadDelay)
 import Control.Exception (catch)
 import Control.Monad
 import Data.IORef (IORef, newIORef, readIORef, writeIORef, atomicModifyIORef')
@@ -25,10 +25,11 @@ type Pool = IORef [Job]
 main :: IO ()
 main = do
   sock <- listenOn lohPort
-  pool <- newIORef []
+  pref <- newIORef []
+  forkIO $ runJobs pref >> threadDelay 60000000
   forever $ do
     (h, _, _) <- accept sock
-    forkIO $ getJob h pool
+    forkIO $ getJob h pref
  where
   lohPort = PortNumber 9114
 
@@ -40,6 +41,7 @@ getJob h p = do
   case eej of
     Left _ -> return ()
     Right j -> unless (broken j) (atomicModifyIORef' p (\js -> (j : js, ())))
+  hClose h
 
 
 broken :: R JSON Send Ready -> Bool
