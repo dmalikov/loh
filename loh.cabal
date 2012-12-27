@@ -3,14 +3,10 @@ Version:                0.0.0
 Category:               Network
 Description:            LastFMScrobbler on Haskell
 Synopsis:               LastFMScrobbler on Haskell
-
 License:                MIT
 License-file:           LICENSE
-
 Author:                 Dmitry Malikov
-
 Maintainer:             Dmitry Malikov <malikov.d.y@gmail.com>
-
 Build-type:             Simple
 Cabal-version:          >= 1.6
 Homepage:               https://github.com/dmalikov/loh
@@ -32,5 +28,6 @@ Executable              lohd
                         liblastfm >= 0.0.4,
                         mtl,
                         network,
+                        lens,
                         cereal
   HS-Source-Dirs:       src

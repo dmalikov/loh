@@ -2,52 +2,46 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import           Control.Concurrent         (forkIO)
-import           System.IO
+import Control.Concurrent (forkIO)
+import Control.Monad
+import Data.IORef (IORef, newIORef, atomicModifyIORef')
+import System.IO
 
-import           Control.Monad.State
+import           Control.Lens
 import qualified Data.ByteString as B
 import           Data.Serialize (decode)
-import           Network.Socket
+import           Network
 import           Network.Lastfm
+import           Network.Lastfm.Internal
+
+
+type Job = R JSON Send Ready
+type Pool = IORef [Job]
 
 
 main :: IO ()
-main = scrobbler
-
-
-scrobbler :: IO ()
-scrobbler = withSocketsDo $ do
-  sock <- socket AF_INET Stream 0
-  setSocketOption sock ReuseAddr 1
-  bindSocket sock (SockAddrInet lohPort iNADDR_ANY)
-  listen sock 1024
-  forever $ serve sock
-
-
-serve :: Socket -> IO ()
-serve sock = do
-  (s, _) <- accept sock
-  h <- socketToHandle s ReadWriteMode
-  hSetBuffering h LineBuffering
-  void $ forkIO $ evalStateT (playerLoop h) []
+main = do
+  sock <- listenOn lohPort
+  pool <- newIORef []
+  forever $ do
+    (h, _, _) <- accept sock
+    forkIO $ getJob h pool
+ where
+  lohPort = PortNumber 9114
 
 
 -- | Broken
-playerLoop :: Handle -> StateT [R JSON Send Ready] IO ()
-playerLoop h = do
-  nT <- lift $ decode <$> B.hGetContents h
-  case nT of
+getJob :: Handle -> Pool -> IO ()
+getJob h p = do
+  eej <- decode <$> B.hGetContents h
+  case eej of
     Left _ -> return ()
-    Right newTask -> do
-      taskDone <- lift $ doTask newTask
-      unless taskDone $ modify $ (:) newTask
-      playerLoop h
+    Right j -> unless (broken j) (atomicModifyIORef' p (\js -> (j : js, ())))
 
 
-doTask :: R JSON Send Ready -> IO Bool
-doTask r = lastfm' r >> return True
-
-
-lohPort :: PortNumber
-lohPort = 9114
+broken :: R JSON Send Ready -> Bool
+broken r = view (query . _at "method") r `notElem`
+  [ "track.scrobble"
+  , "track.updateNowPlaying"
+  , "track.love"
+  ]
