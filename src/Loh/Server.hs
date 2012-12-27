@@ -6,10 +6,13 @@ import Control.Concurrent (forkIO, threadDelay)
 import Control.Concurrent.MVar
 import Control.Exception (catch)
 import Control.Monad
+import Data.Unique
 import System.IO
 
 import           Control.Lens
-import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as B
+import           Data.IntMap (IntMap)
+import qualified Data.IntMap as M
 import           Data.Serialize (decode)
 import           Network
 import qualified Network.HTTP.Conduit as C
@@ -19,13 +22,13 @@ import           Network.Lastfm.Internal
 
 
 type Job = R JSON Send Ready
-type Pool = MVar [Job]
+type Pool = MVar (IntMap Job)
 
 
 main :: IO ()
 main = do
   sock <- listenOn lohPort
-  pref <- newMVar []
+  pref <- newMVar M.empty
   forkIO $ runJobs pref >> threadDelay 60000000
   forever $ do
     (h, _, _) <- accept sock
@@ -35,16 +38,18 @@ main = do
 
 
 runJobs :: Pool -> IO ()
-runJobs pref = report pref >> modifyMVar_ pref (filterM runJob)
+runJobs pref = report pref >> modifyMVar_ pref batch
+ where
+  batch jobs = M.differenceWith (\j b -> if b then Just j else Nothing) jobs <$> traverse runJob jobs
 
 
 report :: Pool -> IO ()
 report pref = withMVar pref $ \pool ->
-  putStrLn $ "there are " ++ show (length pool) ++ " jobs currently pending."
+  putStrLn $ "there are " ++ show (M.size pool) ++ " jobs currently pending."
 
 
 runJob :: Job -> IO Bool
-runJob j = do
+runJob j =
   catch (lastfm' j >> return True) (return . badJob)
  where
   badJob :: C.HttpException -> Bool
@@ -58,7 +63,10 @@ getJob h pref = do
   eej <- decode <$> B.hGetContents h
   case eej of
     Left _ -> return ()
-    Right j -> unless (broken j) (modifyMVar_ pref (return . (j:)))
+    Right j -> unless (broken j) $ do
+      unique <- hashUnique <$> newUnique
+      modifyMVar_ pref (return . M.insert unique j)
+      B.hPut h (B.pack $ show unique)
   hClose h
 
 
