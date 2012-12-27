@@ -3,9 +3,9 @@
 module Main where
 
 import Control.Concurrent (forkIO, threadDelay)
+import Control.Concurrent.MVar
 import Control.Exception (catch)
 import Control.Monad
-import Data.IORef (IORef, newIORef, readIORef, writeIORef, atomicModifyIORef')
 import System.IO
 
 import           Control.Lens
@@ -19,13 +19,13 @@ import           Network.Lastfm.Internal
 
 
 type Job = R JSON Send Ready
-type Pool = IORef [Job]
+type Pool = MVar [Job]
 
 
 main :: IO ()
 main = do
   sock <- listenOn lohPort
-  pref <- newIORef []
+  pref <- newMVar []
   forkIO $ runJobs pref >> threadDelay 60000000
   forever $ do
     (h, _, _) <- accept sock
@@ -36,11 +36,11 @@ main = do
 
 -- | Broken
 getJob :: Handle -> Pool -> IO ()
-getJob h p = do
+getJob h pref = do
   eej <- decode <$> B.hGetContents h
   case eej of
     Left _ -> return ()
-    Right j -> unless (broken j) (atomicModifyIORef' p (\js -> (j : js, ())))
+    Right j -> unless (broken j) (modifyMVar_ pref (return . (j:)))
   hClose h
 
 
@@ -53,7 +53,7 @@ broken r = view (query . _at "method") r `notElem`
 
 
 runJobs :: Pool -> IO ()
-runJobs pref = readIORef pref >>= filterM runJob >>= writeIORef pref
+runJobs pref = modifyMVar_ pref (filterM runJob)
 
 
 runJob :: Job -> IO Bool
@@ -67,6 +67,5 @@ runJob j = do
 
 
 report :: Pool -> IO ()
-report pref = do
-  pool <- readIORef pref
+report pref = withMVar pref $ \pool ->
   putStrLn $ "there are " ++ show (length pool) ++ " jobs currently pending."
