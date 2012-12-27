@@ -34,7 +34,25 @@ main = do
   lohPort = PortNumber 9114
 
 
--- | Broken
+runJobs :: Pool -> IO ()
+runJobs pref = report pref >> modifyMVar_ pref (filterM runJob)
+
+
+report :: Pool -> IO ()
+report pref = withMVar pref $ \pool ->
+  putStrLn $ "there are " ++ show (length pool) ++ " jobs currently pending."
+
+
+runJob :: Job -> IO Bool
+runJob j = do
+  catch (lastfm' j >> return True) (return . badJob)
+ where
+  badJob :: C.HttpException -> Bool
+  badJob (C.StatusCodeException s _) = C.statusIsClientError s
+  badJob (C.ResponseTimeout) = False
+  badJob _ = True
+
+
 getJob :: Handle -> Pool -> IO ()
 getJob h pref = do
   eej <- decode <$> B.hGetContents h
@@ -50,22 +68,3 @@ broken r = view (query . _at "method") r `notElem`
   , "track.updateNowPlaying"
   , "track.love"
   ]
-
-
-runJobs :: Pool -> IO ()
-runJobs pref = modifyMVar_ pref (filterM runJob)
-
-
-runJob :: Job -> IO Bool
-runJob j = do
-  catch (lastfm' j >> return True) (return . badJob)
- where
-  badJob :: C.HttpException -> Bool
-  badJob (C.StatusCodeException s _) = C.statusIsClientError s
-  badJob (C.ResponseTimeout) = False
-  badJob _ = True
-
-
-report :: Pool -> IO ()
-report pref = withMVar pref $ \pool ->
-  putStrLn $ "there are " ++ show (length pool) ++ " jobs currently pending."
