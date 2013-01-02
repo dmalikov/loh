@@ -29,7 +29,7 @@ main :: IO ()
 main = do
   sock <- listenOn lohPort
   pref <- newMVar M.empty
-  forkIO $ runJobs pref >> threadDelay 60000000
+  forkIO $ forever $ runJobs pref >> threadDelay 60000000
   forever $ do
     (h, _, _) <- accept sock
     forkIO $ getJob h pref
