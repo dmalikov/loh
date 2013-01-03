@@ -40,7 +40,7 @@ main = do
 runJobs :: Pool -> IO ()
 runJobs pref = report pref >> modifyMVar_ pref batch
  where
-  batch jobs = M.differenceWith (\j b -> if b then Just j else Nothing) jobs <$> traverse runJob jobs
+  batch jobs = M.differenceWith (\j b -> if b then Nothing else Just j) jobs <$> traverse runJob jobs
 
 
 report :: Pool -> IO ()
