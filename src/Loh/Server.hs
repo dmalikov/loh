@@ -28,23 +28,23 @@ type Pool = MVar (IntMap Job)
 main :: IO ()
 main = do
   sock <- listenOn lohPort
-  pref <- newMVar M.empty
-  forkIO $ forever $ runJobs pref >> threadDelay 60000000
+  rpoo <- newMVar M.empty
+  forkIO $ forever $ runJobs rpoo >> threadDelay 60000000
   forever $ do
     (h, _, _) <- accept sock
-    forkIO $ getJob h pref
+    forkIO $ getJob h rpoo
  where
   lohPort = PortNumber 9114
 
 
 runJobs :: Pool -> IO ()
-runJobs pref = report pref >> modifyMVar_ pref batch
+runJobs rpoo = report rpoo >> modifyMVar_ rpoo batch
  where
   batch jobs = M.differenceWith (\j b -> if b then Nothing else Just j) jobs <$> traverse runJob jobs
 
 
 report :: Pool -> IO ()
-report pref = withMVar pref $ \pool ->
+report rpoo = withMVar rpoo $ \pool ->
   putStrLn $ "there are " ++ show (M.size pool) ++ " jobs currently pending."
 
 
@@ -59,13 +59,13 @@ runJob j =
 
 
 getJob :: Handle -> Pool -> IO ()
-getJob h pref = do
+getJob h rpoo = do
   eej <- decode <$> B.hGetContents h
   case eej of
     Left _ -> return ()
     Right j -> unless (broken j) $ do
       unique <- hashUnique <$> newUnique
-      modifyMVar_ pref (return . M.insert unique j)
+      modifyMVar_ rpoo (return . M.insert unique j)
       B.hPut h (B.pack $ show unique)
   hClose h
 
