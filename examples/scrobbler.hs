@@ -35,7 +35,7 @@ sk :: Request f Sign SessionKey
 sk = sessionKey "__YOUR_SESSION_KEY__"
 
 secret :: Secret
-secret = Secret "__YOUR_SECRET__"
+secret = "__YOUR_SECRET__"
 
 
 main :: IO ()
