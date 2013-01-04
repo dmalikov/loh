@@ -60,13 +60,16 @@ runJob j =
 
 getJob :: Handle -> Pool -> IO ()
 getJob h rpoo = do
-  eej <- decode <$> B.hGetContents h
-  case eej of
+  msgSize <- decode <$> B.hGet h 8
+  case msgSize of
     Left _ -> return ()
-    Right j -> unless (broken j) $ do
-      unique <- hashUnique <$> newUnique
-      modifyMVar_ rpoo (return . M.insert unique j)
-      B.hPut h (B.pack $ show unique)
+    Right size -> do
+      eej <- decode <$> B.hGet h size
+      case eej of
+        Left _ -> return ()
+        Right j -> unless (broken j) $ do
+          unique <- hashUnique <$> newUnique
+          B.hPut h (B.pack $ show unique)
   hClose h
 
 

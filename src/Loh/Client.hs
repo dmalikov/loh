@@ -2,6 +2,7 @@
 module Loh.Client (send, LohClientException(..)) where
 
 import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as BSC
 import           Data.Serialize (encode)
 import           Network.Lastfm
 import           Network
@@ -23,8 +24,13 @@ data LohClientException =
 send :: String                  -- ^ Loh hostname
      -> Int                     -- ^ Loh port
      -> Request JSON Send Ready -- ^ Request to send
-     -> IO ()
+     -> IO (Maybe Int)          -- ^ Job ID
 send host port r = do
   h <- connectTo host (PortNumber $ fromIntegral port)
-  B.hPut h (encode (finalize r))
+  B.hPut h $ encode $ B.length msg
+  B.hPut h msg
+  maybeID <- BSC.readInt <$> B.hGet h 8
   hClose h
+  return $ fst <$> maybeID
+ where
+  msg = encode $ finalize r

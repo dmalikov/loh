@@ -3,7 +3,7 @@
 module Main where
 
 import Control.Concurrent (threadDelay)
-import Control.Monad (forever, when)
+import Control.Monad (forever, when, void)
 import Data.Int (Int64)
 import Data.Maybe (fromMaybe)
 
@@ -78,7 +78,7 @@ eventLoop handler = MPD.withMPD $ do
 
 setNowPlaying :: TrackInfo -> IO ()
 setNowPlaying TrackInfo { _artist = ar, _track = t, _album = al, _duration = d } =
-  send "localhost" 9114 . sign secret $
+  void $ send "localhost" 9114 . sign secret $
     Track.updateNowPlaying <*> artist ar <*> track t <* album al <* duration d <*> ak <*> sk
 
 
@@ -86,5 +86,5 @@ scrobble :: TrackInfo -> IO ()
 scrobble TrackInfo { _artist = ar, _track = t, _album = al, _duration = d, _timestamp = ts } = do
   nts <- read . formatTime defaultTimeLocale "%s" <$> getCurrentTime
   when (nts - ts > fromIntegral (d `div` 2)) $
-    send "localhost" 9114 . sign secret $
+    void $ send "localhost" 9114 . sign secret $
       Track.scrobble <*> artist ar <*> track t <*> timestamp nts <* album al <*> ak <*> sk
