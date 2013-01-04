@@ -69,6 +69,7 @@ getJob h rpoo = do
         Left _ -> return ()
         Right j -> unless (broken j) $ do
           unique <- hashUnique <$> newUnique
+          modifyMVar_ rpoo (return . M.insert unique j)
           B.hPut h (B.pack $ show unique)
   hClose h
 
