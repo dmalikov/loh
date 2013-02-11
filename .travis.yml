@@ -1,4 +1,4 @@
 language: haskell
 install:
-  - cabal update --verbose=2
-  - cabal install
+ - cabal update
+ - cabal install --force-reinstalls
