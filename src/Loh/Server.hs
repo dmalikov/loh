@@ -75,7 +75,7 @@ getJob h rpoo = do
 
 
 broken :: R JSON Send Ready -> Bool
-broken r = view (query . _at "method") r `notElem`
+broken r = view (query . ix "method") r `notElem`
   [ "track.scrobble"
   , "track.updateNowPlaying"
   , "track.love"
