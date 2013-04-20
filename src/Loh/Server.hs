@@ -53,7 +53,7 @@ runJob j =
   catch (lastfm' j >> return True) (return . badJob)
  where
   badJob :: C.HttpException -> Bool
-  badJob (C.StatusCodeException s _) = C.statusIsClientError s
+  badJob (C.StatusCodeException s _ _) = C.statusIsClientError s
   badJob (C.ResponseTimeout) = False
   badJob _ = True
 
